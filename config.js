@@ -51,6 +51,10 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
   }
   let default_rpcs = ['https://rpc.xdaichain.com', 'https://kaliumapi.appditto.com/api', 'https://mynano.ninja/api/node'];
   if (config[coin].enabled) {
+    if (config[coin].address) {
+      throw new Error('Faucet address for coin "'+coin+'" required, but missing')
+    }
+    
     if (config[coin].rpc == undefined) {
       config[coin].rpc = default_rpcs[coin];
     }
