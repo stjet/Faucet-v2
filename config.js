@@ -44,6 +44,10 @@ if (config.unopened_reduced_payouts == undefined) {
   config.unopened_reduced_payouts = false;
 }
 
+if (config.faucet_name == undefined) {
+  config.faucet_name = config.owner
+}
+
 let enabled_coins = [];
 for (let c_num = 0; c_num < coins.length; c_num++) {
   let coin = coins[c_num];
