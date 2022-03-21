@@ -44,6 +44,7 @@ if (config.unopened_reduced_payouts == undefined) {
   config.unopened_reduced_payouts = false;
 }
 
+let enabled_coins = [];
 for (let c_num = 0; c_num < coins.length; c_num++) {
   let coin = coins[c_num];
   if (config[coin] == undefined) {
@@ -51,6 +52,8 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
   }
   let default_rpcs = ['https://rpc.xdaichain.com', 'https://kaliumapi.appditto.com/api', 'https://mynano.ninja/api/node'];
   if (config[coin].enabled) {
+    enabled_coins.push(coin);
+
     if (config[coin].address) {
       throw new Error('Faucet address for coin "'+coin+'" required, but missing')
     }
@@ -67,6 +70,12 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
     }
   }
 }
+
+config.enabled_coins = enabled_coins;
+
+//add blacklist to config
+config.blacklist = JSON.parse(fs.readFileSync('blacklist.json'));
+
 
 if (process.argv[0] == "packagesetup") {
   /* create a package.json file based on settings, including command to run index.js (with parameters ofc) */
