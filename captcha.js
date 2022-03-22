@@ -3,6 +3,15 @@ const config = require("./config.js");
 
 //captcha functions should take in the request body, then return a bool to see if captcha was successful
 
+async function prussia_captcha_request() {
+  //get
+  let resp = await fetch(config.captcha.prussia_captcha+'/captcha', {method: 'GET'});
+  challenge_url = config.captcha.prussia_captcha+'/challenge/'+resp.image+"?nonce="+resp.nonce;
+  challenge_code = resp.code;
+  challenge_nonce = resp.nonce;
+  return [challenge_url, challenge_code, challenge_nonce];
+}
+
 async function prussia_captcha(req_body) {
   let code = req_body['code'];
   let nonce = req_body['nonce'];
@@ -33,6 +42,7 @@ async function hcaptcha(req_body) {
 
 if (config.captcha.use == "prussia_captcha") {
   module.exports.get_captcha_success = prussia_captcha;
+  module.exports.get_captcha = prussia_captcha_request;
 } else if (config.captcha.use == "hcaptcha") {
   module.exports.get_captcha_success = hcaptcha;
 }

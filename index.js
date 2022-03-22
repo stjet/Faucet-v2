@@ -1,4 +1,5 @@
 const config = require("./config.js");
+const captcha = require("./captcha.js");
 const express = require('express');
 const nunjucks = require('nunjucks');
 
@@ -44,7 +45,7 @@ app.use(cookieParser());
 
 //based on config currencies, set up web servers and import currencies
 
-const captcha = config.captcha.use;
+const captcha_use = config.captcha.use;
 const faucet_name = config.faucet_name;
 
 let banano;
@@ -55,8 +56,13 @@ if (config.enabled_coins.includes('banano')) {
   let faucet_address = config.banano.address;
   async function banano_get_handler(req, res) {
     let current_bal = await banano.check_bal(faucet_address);
+    let challenge_url, challenge_code, challenge_nonce;
+    if (captcha_use == "prussia_captcha") {
+      let [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
+      //pass these to nunjucks
+    }
     //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors
-    return res.send(nunjucks.render('index.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha, given: false, amount: false, faucet_address: faucet_address, current_bal: current_bal, errors: false}));
+    return res.send(nunjucks.render('index.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: false, amount: false, faucet_address: faucet_address, current_bal: current_bal, errors: false, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce}));
   }
   async function banano_post_handler(req, res) {
     //

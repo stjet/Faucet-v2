@@ -52,7 +52,15 @@
           {% if captcha == 'hcaptcha' %}
             <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
           {% else if captcha == 'prussia' %}
+            //challenge_url, challenge_code, challenge_nonce
             <!--Prussia captcha html stuff-->
+            <div id="challenge">
+              <img src="{{ challenge_url }}" title="A text captcha" id="challenge-img"/>
+              <input type="text" name="answer" id="challenge-answer"/>
+              <input type="hidden" name="code" value="{{ challenge_code }}"/>
+              <input type="hidden" name="nonce" value="{{ challenge_nonce }}"/>
+              <br>
+            </div>
           {% endif %}
           <div id="checkbox"></div>
           <div class="btn-container">
