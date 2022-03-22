@@ -2,6 +2,8 @@ const config = require("./config.js");
 const express = require('express');
 const nunjucks = require('nunjucks');
 
+const { milliseconds_to_readable } = require('./util.js');
+
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
@@ -41,9 +43,20 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 //based on config currencies, set up web servers and import currencies
+
+const captcha = config.captcha.use;
+const faucet_name = config.faucet_name;
+
+let banano;
 if (config.enabled_coins.includes('banano')) {
+  banano = require('./cryptos/banano.js');
+  //turn this into claim time string
+  let claim_time_str = milliseconds_to_readable(config.banano.claim_frequency);
+  let faucet_address = config.banano.address;
   async function banano_get_handler(req, res) {
-    //
+    let current_bal = await banano.check_bal(faucet_address);
+    //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors
+    return res.send(nunjucks.render('index.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha, given: false, amount: false, faucet_address: faucet_address, current_bal: current_bal, errors: false}));
   }
   async function banano_post_handler(req, res) {
     //

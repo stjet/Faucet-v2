@@ -62,13 +62,13 @@ async function is_unopened(address) {
 }
  
 async function receive_deposits() {
-  let rep = await bananojs.getAccountInfo(await bananojs.getBananoAccountFromSeed(process.env.seed, 0), true);
+  let rep = await bananojs.getAccountInfo(await bananojs.getBananoAccountFromSeed(seed, 0), true);
   rep = rep.representative;
   if (!rep) {
     //set self as rep if no other set rep
-    await bananojs.receiveBananoDepositsForSeed(process.env.seed, 0, await bananojs.getBananoAccountFromSeed(process.env.seed, 0));
+    await bananojs.receiveBananoDepositsForSeed(seed, 0, await bananojs.getBananoAccountFromSeed(seed, 0));
   }
-  await bananojs.receiveBananoDepositsForSeed(process.env.seed, 0, rep);
+  await bananojs.receiveBananoDepositsForSeed(seed, 0, rep);
 }
 
 async function is_valid(address) {

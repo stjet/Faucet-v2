@@ -1,20 +1,20 @@
 {
   "name": "Prussia's <coin> Faucet",
   "db": {
-    "db_connection_string": "mongodb+srv://dbUser:<password>@cluster0.4hkct.mongodb.net/db?retryWrites=true&w=majority",
+    "service": "mongodb",
     "collection_name": "collection"
   },
   "port": 8080,
   "unopened_reduced_payouts": false,
-  "claim_frequency": 86400000,
   "captcha": {
-    "use": "prussia_captcha"
-    "prussia_captcha": "https://captcha.prussia.dev",
-  }
+    "use": "prussia_captcha",
+    "prussia_captcha": "https://captcha.prussia.dev"
+  },
   "favicon": false,
   "logo": "LOGO.png",
   "owner": "Prussia",
   "banano": {
+    "claim_frequency": 86400000,
     "enabled": true,
     "default": true,
     "address": "ban_3346kkobb11qqpo17imgiybmwrgibr7yi34mwn5j6uywyke8f7fnfp94uyps",
@@ -26,6 +26,7 @@
     }
   },
   "nano": {
+    "claim_frequency": 86400000,
     "enabled": true,
     "address": "nano_3346kkobb11qqpo17imgiybmwrgibr7yi34mwn5j6uywyke8f7fnfp94uyps",
     "rpc": "",
@@ -36,6 +37,7 @@
     }
   },
   "xdai": {
+    "claim_frequency": 86400000,
     "enabled": true,
     "address": "0x6e49e60f7228b6cc9883c89811266d212092a8aa",
     "rpc": "",

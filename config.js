@@ -6,17 +6,17 @@ let config = JSON.parse(fs.readFileSync('config.json'));
 let coins = ['xdai', 'banano', 'nano'];
 
 //throw error if required is missing
-let required = ['name', 'db', 'claim_frequency', 'captcha', 'logo', 'secrets']
+let required = ['name', 'db', 'captcha', 'logo', 'secrets']
 for (let r_num = 0; r_num < required.length; r_num++) {
-  let key = config[r_num];
+  let key = config[required[r_num]];
   if (key == undefined) {
     throw new Error('Required key in config `'+key+'` is missing');
   }
 }
 
 //cannot be empty or undefined
-if (!config.db.collection || !config.db.db_connection_string) {
-  throw new Error('Missing mongodb info in config');
+if (!config.db.collection_name || !config.db.service) {
+  throw new Error('Missing DB (mongodb likely) info in config');
 }
 
 if (!config.captcha.use || !['hcaptcha', 'prussia_captcha'].includes(config.captcha.use)) {
@@ -58,7 +58,15 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
   if (config[coin].enabled) {
     enabled_coins.push(coin);
 
-    if (config[coin].address) {
+    if (config[coin].claim_frequency == undefined || isNaN(config[coin].claim_frequency)) {
+      throw new Error('Missing '+coin+' claim frequency, or claim frequency not a number')
+    }
+
+    if (config[coin].claim_frequency < 1000*60*10) {
+      throw new Error('A claim frequency is less than 10 minutes. This... is a bad idea. Remember, the value is in milliseconds.')
+    }
+
+    if (!config[coin].address) {
       throw new Error('Faucet address for coin "'+coin+'" required, but missing')
     }
     
@@ -80,8 +88,7 @@ config.enabled_coins = enabled_coins;
 //add blacklist to config
 config.blacklist = JSON.parse(fs.readFileSync('blacklist.json'));
 
-
-if (process.argv[0] == "packagesetup") {
+if (process.argv[2] == "packagesetup") {
   /* create a package.json file based on settings, including command to run index.js (with parameters ofc) */
 
   //description, dependencies, keywords
@@ -110,12 +117,11 @@ if (process.argv[0] == "packagesetup") {
   //generate description, keywords
   let keywords = ['"crypto"','"faucet"'];
   let description = 'A ';
-  let activated_coins = [];
   for (let c_num2 = 0; c_num2 < coins.length; c_num2++) {
     let coin = coins[c_num2];
     if (config[coin].enabled) {
       keywords.push('"'+coin+'"');
-      if (activated_coin_num == coins.length) {
+      if (c_num2 == coins.length) {
         description += coin+' ';
       } else if (activated_coin_num != 1) {
         description += coin+', ';
@@ -130,23 +136,27 @@ if (process.argv[0] == "packagesetup") {
 //change dependencies into readable form
   let dependencies_string = "";
   for (let dep_num=0; dep_num < Object.keys(dependencies).length; dep_num++) {
-    dependencies_string += "\n    "Object.keys(dependencies)[dep_num]+": "+'"'+[dependenciesObject].keys(dependencies)[dep_num]]+'",';
+    dependencies_string += '\n      "'+Object.keys(dependencies)[dep_num]+'": '+'"'+dependencies[Object.keys(dependencies)[dep_num]]+'"';
+    if (dep_num != Object.keys(dependencies).length-1) {
+      dependencies_string += ',';
+    }
   }
 
   let package_js_npm_str = `{
     "name": "Prussia-Faucet",
     "version": "2.0.0",
-    "description": `+description+`,
+    "description": "`+description+`",
     "main": "index.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
+      "main": "node index.js",
+      "packagesetup": "node config.js packagesetup"
     },
     "keywords": [`+keywords.join(', ')+`],
     "author": "Jetstream0 <@prussia.dev>",
     "license": "MIT",
     "dependencies": {`+dependencies_string+`
     }
-  }`;
+}`;
 
   //write to package.json
   fs.writeFileSync('package.json', package_js_npm_str);
