@@ -1,8 +1,9 @@
 const mongo = require('mongodb');
+const config = require('./config.js');
 
 //starts with: "mongodb+srv://"
 
-const mongo_connection_string;
+let mongo_connection_string;
 if (config.secrets.use_env) {
   mongo_connection_string = process.env.mongo_connection_string;
 } else {

@@ -3,33 +3,10 @@ const captcha = require("./captcha.js");
 const express = require('express');
 const nunjucks = require('nunjucks');
 
-const { milliseconds_to_readable } = require('./util.js');
+const {milliseconds_to_readable, insert, replace, find, count} = require('./util.js');
 
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-
-//db
-let db = mongo.getDb();
-let collection;
-//collection.find({}).forEach(console.dir)
-db.then((db) => {collection = db.collection("collection"); 
-});
-
-async function insert(addr,value) {
-  await collection.insertOne({"address":addr,"value":value});
-}
-
-async function replace(addr,newvalue) {
-  await collection.replaceOne({"address":addr}, {"address":addr,"value":newvalue});
-}
-
-async function find(addr) {
-  return await collection.findOne({"address":addr});
-}
-
-async function count(query) {
-  return await collection.count(query);
-}
 
 //templating, web server
 nunjucks.configure('templates', { autoescape: true });
@@ -61,11 +38,18 @@ if (config.enabled_coins.includes('banano')) {
       let [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
       //pass these to nunjucks
     }
-    //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors
+    //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
     return res.send(nunjucks.render('index.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: false, amount: false, faucet_address: faucet_address, current_bal: current_bal, errors: false, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce}));
   }
   async function banano_post_handler(req, res) {
-    //
+		//claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
+    let address = req.body.address;
+		let errors = false;
+		let given = false;
+		//check captcha
+		//check db
+		//check cookies
+		//send
   }
   //I am aware we can set a variable to the url path, but I think this is more readable
   if (config.banano.default) {

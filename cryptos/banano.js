@@ -1,11 +1,11 @@
 const bananojs = require('bananojs');
-const config = require("./config.js");
+const config = require("../config.js");
 
 const rpc_url = config.banano.rpc
 
 bananojs.setBananodeApiUrl(rpc_url);
 
-const seed;
+let seed;
 if (config.secrets.use_env) {
   seed = process.env.bn_seed;
 } else {
