@@ -14,11 +14,6 @@ for (let r_num = 0; r_num < required.length; r_num++) {
   }
 }
 
-//cannot be empty or undefined
-if (!config.db.collection_name || !config.db.service) {
-  throw new Error('Missing DB (mongodb likely) info in config');
-}
-
 if (!config.captcha.use || !['hcaptcha', 'prussia_captcha'].includes(config.captcha.use)) {
   throw new Error('Missing or invalid captcha use in config');
 }

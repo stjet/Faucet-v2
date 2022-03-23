@@ -1,4 +1,5 @@
 const mongo = require('./mongo.js');
+const config = require('./config.js');
 
 //turns milliseconds to a more readable format, such as minutes, hours, days
 function milliseconds_to_readable(milliseconds) {
@@ -49,25 +50,49 @@ function milliseconds_to_readable(milliseconds) {
 }
 
 let db = mongo.getDb();
-let collection;
-//collection.find({}).forEach(console.dir)
-db.then((db) => {collection = db.collection("collection"); 
+//we want seperate collections for each currency
+let collections = {};
+db.then((db) => {
+	//we want to see what currencies are supported, and get a collection for each one
+	let enabled_coins = config.enabled_coins;
+	for (let i=0; i < enabled_coins.length; i++) {
+		collections[enabled_coins[i]] = db.collection(enabled_coins[i]);
+	}
 });
 
-async function insert(addr,value) {
-  await collection.insertOne({"address":addr,"value":value});
+async function insert(address, value, coin) {
+  await collections[coin].insertOne({"address":address,"value":value});
 }
 
-async function replace(addr,newvalue) {
-  await collection.replaceOne({"address":addr}, {"address":addr,"value":newvalue});
+async function replace(address, newvalue, coin) {
+  await collections[coin].replaceOne({"address":address}, {"address":address,"value":newvalue});
 }
 
-async function find(addr) {
-  return await collection.findOne({"address":addr});
+async function find(address, coin) {
+  return await collections[coin].findOne({"address":address});
 }
 
-async function count(query) {
-  return await collection.count(query);
+async function count(query, coin) {
+  return await collections[coin].count(query);
+}
+
+async function claim_too_soon_db(address, coin) {
+	let address_info = await find(address, coin);
+	if (!address_info) {
+		return false;
+	}
+	if (Date.now() > (address_info.value+config[coin].claim_frequency)) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+async claim_too_soon_cookies(req_cookies, coin) {
+	if (Date.now() > Number(req_cookies["last_claim_"+coin])+config[coin].claim_frequency) {
+		return false;
+	}
+	return true;
 }
 
 module.exports = {
@@ -75,5 +100,7 @@ module.exports = {
 	insert: insert,
 	replace: replace,
 	find: find,
-	count: count
+	count: count,
+	claim_too_soon_db: claim_too_soon_db,
+	claim_too_soon_cookies: claim_too_soon_cookies
 }

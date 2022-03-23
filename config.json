@@ -1,9 +1,6 @@
 {
   "name": "Prussia's <coin> Faucet",
-  "db": {
-    "service": "mongodb",
-    "collection_name": "collection"
-  },
+  "db": "mongodb",
   "port": 8080,
   "unopened_reduced_payouts": false,
   "captcha": {

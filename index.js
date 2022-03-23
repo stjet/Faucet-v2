@@ -47,9 +47,22 @@ if (config.enabled_coins.includes('banano')) {
 		let errors = false;
 		let given = false;
 		//check captcha
+		let success = await captcha.get_captcha_success(req.body);
+		if (!success) {
+			//
+		}
+		let too_soon_db = await util.claim_too_soon_db(address, "banano");
 		//check db
+		if (too_soon_db) {
+			//
+		}
 		//check cookies
-		//send
+		let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, "banano");
+		if (too_soon_cookies) {
+			//
+		}
+		//send banano
+		//
   }
   //I am aware we can set a variable to the url path, but I think this is more readable
   if (config.banano.default) {
