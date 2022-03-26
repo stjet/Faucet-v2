@@ -71,10 +71,13 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
     if (config[coin].default == undefined) {
       config[coin].default = false;
     }
-    //if `percentage` is false, will be random in between max and min. if `percentage` is not false, `percentage` will be the percent of the faucet bal it should be, still adhering to max and min
+    //if `percentage` is false, will be random in between max and min. if `percentage` is not false, `percentage` will be the percent (decimal) of the faucet bal it should be, still adhering to max and min
     if (config[coin].payouts.percentage == undefined) {
       config[coin].payouts.percentage = false;
     }
+		if (config[coin].payouts.min_payout > config[coin].payouts.max_payout) {
+			throw new Error("Min payout cannot be more than max payout");
+		}
   }
 }
 

@@ -1,5 +1,5 @@
-const mongo = require('./mongo.js');
 const config = require('./config.js');
+const mongo = require('./mongo.js');
 
 //turns milliseconds to a more readable format, such as minutes, hours, days
 function milliseconds_to_readable(milliseconds) {
@@ -88,11 +88,47 @@ async function claim_too_soon_db(address, coin) {
 	}
 }
 
-async claim_too_soon_cookies(req_cookies, coin) {
+async function claim_too_soon_cookies(req_cookies, coin) {
 	if (Date.now() > Number(req_cookies["last_claim_"+coin])+config[coin].claim_frequency) {
 		return false;
 	}
 	return true;
+}
+
+function count_decimals(number) {
+	number = String(number)
+	if (number.includes(".")) {
+		return number.split(".")[1].length;
+	} else {
+		return 0;
+	}
+}
+
+function calculate_payouts(config_payouts) {
+	let payout;
+	if (config_payouts.percentage) {
+		//get faucet balance, multiply by percentage
+		payout = current_bal*config_payouts.percentage;
+		if (payout < config_payouts.min_payout) {
+			payout = config_payouts.min_payout;
+		} else if (payout > config_payouts.max_payout) {
+			payout = config_payouts.max_payout;
+		}
+	} else {
+		//random payouts in between min and max
+		//ternary operator to get the highest amount of decimal places
+		let decimals = count_decimals(config_payouts.max_payout) > count_decimals(config_payouts.min_payout) ? count_decimals(config_payouts.max_payout) : count_decimals(config_payouts.min_payout);
+		//with decimal places, multiply and then random
+		if (decimals == 0) {
+			payout = Math.floor(Math.random()*(config_payouts.max_payout-config_payouts.min_payout))+config_payouts.min_payout;
+		} else {
+			let max_payout_shift = config_payouts.max_payout * (10**decimals);
+			let min_payout_shift = config_payouts.min_payout * (10**decimals);
+			payout = Math.floor(Math.random()*((max_payout_shift-min_payout_shift)+1))+min_payout_shift;
+			payout = payout / (10**decimals);
+		}
+		return payout;
+	}
 }
 
 module.exports = {
@@ -102,5 +138,7 @@ module.exports = {
 	find: find,
 	count: count,
 	claim_too_soon_db: claim_too_soon_db,
-	claim_too_soon_cookies: claim_too_soon_cookies
+	claim_too_soon_cookies: claim_too_soon_cookies,
+	count_decimals: count_decimals,
+	calculate_payouts: calculate_payouts
 }
