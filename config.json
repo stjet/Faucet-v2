@@ -8,14 +8,14 @@
     "prussia_captcha": "https://captcha.prussia.dev"
   },
   "favicon": false,
-  "logo": "LOGO.png",
+  "logo": true,
   "owner": "Prussia",
   "banano": {
     "claim_frequency": 86400000,
     "enabled": true,
     "default": true,
     "address": "ban_3346kkobb11qqpo17imgiybmwrgibr7yi34mwn5j6uywyke8f7fnfp94uyps",
-    "rpc": "",
+    "rpc": "https://kaliumapi.appditto.com/api",
     "payouts": {
       "min_payout": 0.02,
       "max_payout": 0.07,

@@ -28,6 +28,8 @@ const faucet_name = config.faucet_name;
 let banano;
 if (config.enabled_coins.includes('banano')) {
   banano = require('./cryptos/banano.js');
+	let extra = {};
+	let extensions = {};
   //turn this into claim time string
   let claim_time_str = util.milliseconds_to_readable(config.banano.claim_frequency);
   let faucet_address = config.banano.address;
@@ -35,11 +37,14 @@ if (config.enabled_coins.includes('banano')) {
     let current_bal = await banano.check_bal(faucet_address);
     let challenge_url, challenge_code, challenge_nonce;
     if (captcha_use == "prussia_captcha") {
-      [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
-      //pass these to nunjucks
+			//pass these to nunjucks
+      let captcha_info = await captcha.get_captcha();
+			challenge_url = captcha_info[0];
+			challenge_code = captcha_info[1];
+			challenge_nonce = captcha_info[2];
     }
     //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
-    return res.send(nunjucks.render('banano.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: false, amount: false, faucet_address: faucet_address, current_bal: current_bal, errors: false, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce}));
+    return res.send(nunjucks.render('banano.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: false, amount: false, faucet_address: faucet_address, current_bal: current_bal, errors: false, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, extra: extra, extensions: extensions}));
   }
   async function banano_post_handler(req, res) {
 		//claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
@@ -70,7 +75,11 @@ if (config.enabled_coins.includes('banano')) {
 		let config_payouts = config.banano.payouts;
 		let challenge_url, challenge_code, challenge_nonce;
 		let payout = util.calculate_payouts(config_payouts);
-		if (config.unopened_reduced_payouts) {
+		let score = await banano.get_score(address);
+		//reduce payouts for suspicious accounts
+		if (config.unopened_reduced_payouts && await banano.is_unopened(address)) {
+			payout = config.banano.payouts.min_payout;
+		} else if (score > 5) {
 			payout = config.banano.payouts.min_payout;
 		}
 		if (!errors) {
@@ -86,7 +95,7 @@ if (config.enabled_coins.includes('banano')) {
         [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
 			}
 		}
-		return res.send(nunjucks.render('banano.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: given, amount: amount, faucet_address: faucet_address, current_bal: current_bal, errors: errors, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce}));
+		return res.send(nunjucks.render('banano.html', {claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: given, amount: amount, faucet_address: faucet_address, current_bal: current_bal, errors: errors, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, extra: extra, extensions: extensions}));
   }
   //I am aware we can set a variable to the url path, but I think this is more readable
   if (config.banano.default) {

@@ -6,6 +6,7 @@ const config = require("./config.js");
 async function prussia_captcha_request() {
   //get
   let resp = await fetch(config.captcha.prussia_captcha+'/captcha', {method: 'GET'});
+	resp = await resp.json();
   challenge_url = config.captcha.prussia_captcha+'/challenge/'+resp.image+"?nonce="+resp.nonce;
   challenge_code = resp.code;
   challenge_nonce = resp.nonce;

@@ -6,12 +6,17 @@ let config = JSON.parse(fs.readFileSync('config.json'));
 let coins = ['xdai', 'banano', 'nano'];
 
 //throw error if required is missing
-let required = ['name', 'db', 'captcha', 'logo', 'secrets']
+let required = ['name', 'db', 'captcha', 'secrets']
 for (let r_num = 0; r_num < required.length; r_num++) {
   let key = config[required[r_num]];
   if (key == undefined) {
     throw new Error('Required key in config `'+key+'` is missing');
   }
+}
+
+//this is just to make sure user uploaded their logo
+if (!config.logo) {
+	throw new Error("Make sure to upload LOGO.png to files/ and add a json value 'logo' as true to the config.json");
 }
 
 if (!config.captcha.use || !['hcaptcha', 'prussia_captcha'].includes(config.captcha.use)) {
@@ -40,7 +45,7 @@ if (config.unopened_reduced_payouts == undefined) {
 }
 
 if (config.faucet_name == undefined) {
-  config.faucet_name = config.owner
+  config.faucet_name = config.owner+" Faucet"
 }
 
 let enabled_coins = [];
