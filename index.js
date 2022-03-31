@@ -25,6 +25,8 @@ app.use(cookieParser());
 const captcha_use = config.captcha.use;
 const faucet_name = config.faucet_name;
 
+let default_found = false;
+
 let banano;
 if (config.enabled_coins.includes('banano')) {
   banano = require('./cryptos/banano.js');
@@ -99,6 +101,7 @@ if (config.enabled_coins.includes('banano')) {
   }
   //I am aware we can set a variable to the url path, but I think this is more readable
   if (config.banano.default) {
+    default_found = true;
     app.get('/', banano_get_handler);
     app.post('/', banano_post_handler);
   } else {
@@ -109,6 +112,14 @@ if (config.enabled_coins.includes('banano')) {
 	//
 } else if (config.enabled_coins.includes('xdai')) {
 	//
+} else if (config.enabled_coins.includes('vite')) {
+  //
+}
+
+if (!default_found) {
+  app.get('/', async function(req, res) {
+    return res.send(nunjucks.render('main.html', {faucet_name: faucet_name, enabled_coins: config.enabled_coins}))
+  });
 }
 
 app.listen(8081, async () => {
