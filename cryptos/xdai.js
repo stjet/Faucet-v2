@@ -2,7 +2,7 @@ const { ethers } = require("ethers");
 const config = require("./config.js");
 const fetch = require('node-fetch');
 
-const rpc_url = config.xdai.rpc
+const rpc_url = config.xdai.rpc;
 
 const provider = new ethers.providers.JsonRpcProvider(rpc_url);
 const signer = provider.getSigner();

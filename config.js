@@ -3,7 +3,7 @@ const fs = require('fs');
 
 let config = JSON.parse(fs.readFileSync('config.json'));
 
-let coins = ['xdai', 'banano', 'nano'];
+let coins = ['xdai', 'banano', 'nano', 'vite'];
 
 //throw error if required is missing
 let required = ['name', 'db', 'captcha', 'secrets']
@@ -54,7 +54,7 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
   if (config[coin] == undefined) {
     config[coin] = {enabled: false};
   }
-  let default_rpcs = ['https://rpc.xdaichain.com', 'https://kaliumapi.appditto.com/api', 'https://mynano.ninja/api/node'];
+  let default_rpcs = ['https://rpc.xdaichain.com', 'https://kaliumapi.appditto.com/api', 'https://mynano.ninja/api/node', 'https://node-vite.thomiz.dev'];
   if (config[coin].enabled) {
     enabled_coins.push(coin);
 
