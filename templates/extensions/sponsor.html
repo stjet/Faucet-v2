@@ -1,5 +1,13 @@
 {% macro input(sponsor_name, sponsor_url, sponsor_descrip, sponsor_img) -%}
     <div class="sponsor">
-			<!-- -->
+      {% if sponsor_img %}
+        <center><img src="{{ sponsor_img }}"></img></center>
+      {% endif %}
+			<p>
+        Thanks to <a href="{{ sponsor_url }}">{{ sponsor_name }}</a>
+        {% if sponsor_descrip %}
+          {{ sponsor_descrip }}
+        {% endif %}
+      </p>
 		</div>
 {%- endmacro %}
