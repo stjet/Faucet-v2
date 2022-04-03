@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta property="og:title" content="{{ faucet_name }}">
+    <meta property="og:description" content="Earn Free xDai!">
+    <meta property="og:image" content="(xdai image here)">
+    <meta name="viewport" content="width=device-width">
+    <title>{{ faucet_name }}</title>
+    {% if captcha == 'hcaptcha' %}
+      <script src="https://hcaptcha.com/1/api.js" async defer></script>
+    {% endif %}
+    <link href="/xdai.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <center>
+    <div id="center">
+      <h1 id="title">xDai Faucet</h2>
+      <p>Need gas? We gotcha covered. Please donate to {{ faucet_addr }}.</p>
+        <p><b></bCheck>Check out our sponsor, <img src="https://www.tripscommunity.com/wp-content/uploads/elementor/thumbs/cropped-cropped-trips-T-icon50x50-pd0c11oo1dci32zxp77yd9du8z9tuukfjo1crve9h0.png
+" id="trips"></img><a href="https://www.tripscommunity.com/">Trips Community</a>!</b> </p>
+      {% if error %}
+        <p>{{ error }}</p>
+      {% endif %}
+      {% if given %}
+        <p>Success! {{ amount }} sent to {{ address }}.</p>
+      {% endif %}
+      <form method="POST" action="/xdai" id="form">
+        <label for="address">xDai Address:</label><input id="address" type="text" name="addr">
+        {% if captcha == 'hcaptcha' %}
+          <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
+        {% elif captcha == 'prussia_captcha' %}
+          <!--Prussia captcha html stuff-->
+          <div id="challenge">
+            <img src="{{ challenge_url }}" title="A text captcha" id="challenge-img"/>
+            <input type="text" name="answer" id="challenge-answer" placeholder="Captcha answer..."/>
+            <input type="hidden" name="code" value="{{ challenge_code }}"/>
+            <input type="hidden" name="nonce" value="{{ challenge_nonce }}"/>
+            <br>
+          </div>
+        {% endif %}
+        <button type="submit" id="get-btn">Get Free xDai</button>
+      </form>
+    </div>
+    </center>
+  </body>
+</html>

@@ -103,11 +103,11 @@ if (config.enabled_coins.includes('banano')) {
   if (config.banano.default) {
     default_found = true;
     app.get('/', banano_get_handler);
-    app.post('/', banano_post_handler);
+    //post will go to /banano no matter the default (4 lines from now)
   } else {
     app.get('/banano', banano_get_handler);
-    app.post('/banano', banano_post_handler);
   }
+  app.post('/banano', banano_post_handler);
 } else if (config.enabled_coins.includes('nano')) {
 	//
 } else if (config.enabled_coins.includes('xdai')) {
