@@ -100,7 +100,8 @@ if (process.argv[2] == "packagesetup") {
   let coin_deps = {
     'xdai': ['ethers', '^5.5.1'],
     'banano': ['bananojs', 'npm:@bananocoin/bananojs@^2.4.24'],
-    'nano': ['nanojs', 'npm:@bananocoin/bananojs@^2.4.24']
+    'nano': ['nanojs', 'npm:@bananocoin/bananojs@^2.4.24'],
+    'vite': ['@vite/vitejs', '^2.3.18', '@vite/vitejs-http', '^2.3.18']
   };
 
   //add dependencies
@@ -109,7 +110,9 @@ if (process.argv[2] == "packagesetup") {
     let coin = coins[c_num2];
     if (config[coin].enabled) {
       activated_coin_num++;
-      dependencies[coin_deps[coin][0]] = coin_deps[coin][1];
+      for (let c_dep=0; c_dep < Math.floor(coin_deps[coin].length/2); c_dep++) {
+        dependencies[coin_deps[coin][c_dep*2]] = coin_deps[coin][c_dep*2+1];
+      }
     }
   }
 
