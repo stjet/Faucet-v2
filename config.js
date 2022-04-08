@@ -22,6 +22,12 @@ if (!config.logo) {
 if (!config.captcha.use || !['hcaptcha', 'prussia_captcha'].includes(config.captcha.use)) {
   throw new Error('Missing or invalid captcha use in config');
 }
+
+//random captcha per run
+if (config.captcha.use == "both") {
+  config.captcha.use = ["hcaptcha", "prussia_captcha"][Math.floor(Math.random()*2)]
+}
+
 //secrets stuff
 
 //see if optional keys exist, if not put them with default values

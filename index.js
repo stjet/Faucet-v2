@@ -29,6 +29,7 @@ let default_found = false;
 
 let banano;
 if (config.enabled_coins.includes('banano')) {
+  let ip_cache = {};
   banano = require('./cryptos/banano.js');
 	let extra = {};
 	let extensions = {};
@@ -55,8 +56,15 @@ if (config.enabled_coins.includes('banano')) {
 		let amount = false;
 		let given = false;
 		let current_bal = await banano.check_bal(faucet_address);
+    let ip = req.header('x-forwarded-for');
+    if (ip_cache[ip] > 4) {
+      errors = "Too many claims from this IP address";
+    }
 		//check faucet dry
 		//check captcha
+    if (!captcha.came_from_site(req)) {
+      errors = "Post request did not come from site";
+    }
 		let success = await captcha.get_captcha_success(req.body);
 		if (!success) {
 			errors = "Failed or expired captcha";
@@ -80,9 +88,9 @@ if (config.enabled_coins.includes('banano')) {
 		let score = await banano.get_score(address);
 		//reduce payouts for suspicious accounts
 		if (config.unopened_reduced_payouts && await banano.is_unopened(address)) {
-			payout = config.banano.payouts.min_payout;
+			payout = config.banano.payouts.min_payout*0.5;
 		} else if (score > 5) {
-			payout = config.banano.payouts.min_payout;
+			payout = config.banano.payouts.min_payout*0.5;
 		}
 		if (!errors) {
 		  let success = await banano.send(address, payout);
@@ -91,6 +99,11 @@ if (config.enabled_coins.includes('banano')) {
 		  } else {
 				given = true;
 				amount = payout;
+        if (ip_cache[ip]) {
+          ip_cache[ip] = ip_cache[ip]+1;
+        } else {
+          ip_cache[ip] = 1;
+        }
 			}
 		} else {
       if (captcha_use == "prussia_captcha") {
@@ -110,10 +123,13 @@ if (config.enabled_coins.includes('banano')) {
   app.post('/banano', banano_post_handler);
 } else if (config.enabled_coins.includes('nano')) {
 	//
+  let ip_cache = {};
 } else if (config.enabled_coins.includes('xdai')) {
 	//
+  let ip_cache = {};
 } else if (config.enabled_coins.includes('vite')) {
   //
+  let ip_cache = {};
 }
 
 if (!default_found) {

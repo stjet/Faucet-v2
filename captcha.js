@@ -41,9 +41,27 @@ async function hcaptcha(req_body) {
   return resp.data['success'];
 }
 
+/*
+Additional security for prussia captcha probably needed.
+*/
+//to disallow external post requests
+function came_from_site(req) {
+  if (config.self) {
+    let host = req.get('host');
+    if (host == config.self) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 if (config.captcha.use == "prussia_captcha") {
   module.exports.get_captcha_success = prussia_captcha;
   module.exports.get_captcha = prussia_captcha_request;
 } else if (config.captcha.use == "hcaptcha") {
   module.exports.get_captcha_success = hcaptcha;
 }
+
+module.exports.came_from_site = came_from_site;

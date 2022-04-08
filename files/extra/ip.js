@@ -1,3 +1,5 @@
+//obsolete, since replit now lets us get IPs, but still an example of an extra
+/*
 async function get_ip() {
 	let resp = await fetch("https://www.cloudflare.com/cdn-cgi/trace");
 	resp = await resp.text();
@@ -21,3 +23,4 @@ async function submit_ip() {
 }
 
 submit_ip();
+*/
