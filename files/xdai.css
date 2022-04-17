@@ -18,3 +18,17 @@ html {
 * {
   font-family: Verdana;
 }
+
+#challenge {
+  width: 200px;
+}
+
+#challenge-answer {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#challenge-img {
+  width: 100%;
+}

@@ -28,6 +28,9 @@ const faucet_name = config.faucet_name;
 let default_found = false;
 
 let banano;
+let nano;
+let xdai;
+let vite;
 if (config.enabled_coins.includes('banano')) {
   let ip_cache = {};
   banano = require('./cryptos/banano.js');
@@ -122,14 +125,43 @@ if (config.enabled_coins.includes('banano')) {
   }
   app.post('/banano', banano_post_handler);
 } else if (config.enabled_coins.includes('nano')) {
-	//
   let ip_cache = {};
+  nano = require('./cryptos/nano.js');
+	let extra = {};
+	let extensions = {};
+  //turn this into claim time string
+  let claim_time_str = util.milliseconds_to_readable(config.nano.claim_frequency);
+  let faucet_address = config.nano.address;
+  async function nano_get_handler(req, res) {
+  }
+  async function nano_post_handler(req, res) {
+  }
 } else if (config.enabled_coins.includes('xdai')) {
 	//
   let ip_cache = {};
+  xdai = require('./cryptos/xdai.js');
+	let extra = {};
+	let extensions = {};
+  //turn this into claim time string
+  let claim_time_str = util.milliseconds_to_readable(config.xdai.claim_frequency);
+  let faucet_address = config.xdai.address;
+  async function xdai_get_handler(req, res) {
+  }
+  async function xdai_post_handler(req, res) {
+  }
 } else if (config.enabled_coins.includes('vite')) {
   //
   let ip_cache = {};
+  vite = require('./cryptos/vite.js');
+	let extra = {};
+	let extensions = {};
+  //turn this into claim time string
+  let claim_time_str = util.milliseconds_to_readable(config.vite.claim_frequency);
+  let faucet_address = config.vite.address;
+  async function vite_get_handler(req, res) {
+  }
+  async function vite_post_handler(req, res) {
+  }
 }
 
 if (!default_found) {

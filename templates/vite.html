@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta property="og:title" content="Vite faucet">
+    <meta property="og:description" content="Free vite and vite token faucet">
+    <meta property="og:image" content="(vite image here)">
+    <meta name="viewport" content="width=device-width">
+    <title>{{ faucet_name }}</title>
+    {% if captcha == 'hcaptcha' %}
+      <script src="https://hcaptcha.com/1/api.js" async defer></script>
+    {% endif %}
+    <link href="vite.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="main">
+      <div id="container">
+        <h1>Vite + Token Faucet</h1>
+        <center>
+          <img src="/vite_in.gif" id="gif"></img>
+          <br>
+          {% if error %}
+            <p>{{ error }}</p>
+          {% endif %}
+          {% if given %}
+            <b>Success! {{ amount }} VITE and {{ amount_token }} {{ token }} sent to {{ address }}</b>
+          {% else %}
+            <button id="claim-button">CLAIM</button>
+          {% endif %}
+        </center>
+        <div>
+          <h2>What is Vite?</h2>
+          <p>Vite is a fast, feeless cryptocurrency that supports Smart Contracts. Learn more at the <a href="https://www.vite.org/">Vite website</a>.</p>
+          <h2>What are Vite Tokens?</h2>
+          <p>Vite tokens are tokens on the vite blockchain. They enjoy the benefit of smart contracts and the lack of fees, unlike other blockchains like Ethereum with long block times and high fees. One example is Vitamin Coin.</p>
+          <h2>About Faucet</h2>
+          <p>Made by <a href="https://prussia.dev">Prussia</a> and proudly open source.</p>
+          <h2>DAG Tech</h2>
+          <p>DAG stands for Directed Acyclic Graph, and is a way of organizing transactions that differs from the conventional blockchain. DAGs enable Vite to quickly and feelessly confirm transactions.</p>
+        </div>
+      </div>
+    </div>
+    <div id="claim-modal-container" style="display: none;">
+      <div id="claim-modal">
+        <form method="POST" action="/vite" id="form">
+          <label for="address">Vite Address:</label><input id="address" type="text" name="addr">
+          <br>
+          {% if captcha == 'hcaptcha' %}
+            <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
+          {% elif captcha == 'prussia_captcha' %}
+            <div id="challenge">
+              <img src="{{ challenge_url }}" title="A text captcha" id="challenge-img"/>
+              <input type="text" name="answer" id="challenge-answer" placeholder="Captcha answer..."/>
+              <input type="hidden" name="code" value="{{ challenge_code }}"/>
+              <input type="hidden" name="nonce" value="{{ challenge_nonce }}"/>
+              <br>
+            </div>
+          {% endif %}
+          <br>
+          <input type="submit" value="submit"/>
+        </form>
+      </div>
+    </div>
+    <script>
+      document.getElementById('claim-button').onclick = function() {
+        document.getElementById('claim-modal-container').style.display = 'block';
+      }
+    </script>
+  </body>
+</html>
