@@ -15,9 +15,13 @@ if (config.secrets.use_env) {
 
 //send both VITC token and VITE
 //token can be undefined
-let token_id = config.vite.token.id;
-let token_amount = config.vite.token.amount;
+let token_id;
+let token_amount;
 let faucet_address = config.vite.address;
+if (config.vite.token) {
+  token_id = config.vite.token.id;
+  token_amount = config.vite.token.amount;
+}
 //if true, facuet will work with token only if there is no supply of VITE
 let token_only = config.vite.optional;
 
@@ -30,6 +34,9 @@ async function check_bal(address) {
   //ledger_getAccountInfoByAddress
   let resp = await provider.request('ledger_getAccountInfoByAddress', address);
   //this is vite
+  if (config.vite.token) {
+    return [resp.balanceInfoMap['tti_5649544520544f4b454e6e40'].balance, false];
+  }
   return [resp.balanceInfoMap['tti_5649544520544f4b454e6e40'].balance, resp.balanceInfoMap[token_id].balance];
 }
 
@@ -42,8 +49,11 @@ async function dry() {
   if (bal[0] < 1) {
     dry_info.coin = true;
   }
-  if (bal[1] < 1) {
-    dry_info.token = true;
+  if (bal[1] === false) {
+  } else {
+    if (bal[1] < 1) {
+      dry_info.token = true;
+    }
   }
   return dry_info
 }

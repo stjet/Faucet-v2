@@ -45,6 +45,23 @@
       "percentage": false
     }
   },
+  ,
+  "vite": {
+    "claim_frequency": 86400000,
+    "enabled": true,
+    "address": "",
+    "rpc": "",
+    "payouts": {
+      "min_payout": 0.01,
+      "max_payout": 0.05,
+      "percentage": false
+    },
+    "token": {
+      "id": "",
+      "amount": 1
+    },
+    "optional": true
+  },
   "api": true,
   "debug": true,
   "secrets": {

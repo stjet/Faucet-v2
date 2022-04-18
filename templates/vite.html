@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta property="og:title" content="Vite faucet">
+    <meta property="og:title" content="Vite Faucet">
     <meta property="og:description" content="Free vite and vite token faucet">
     <meta property="og:image" content="(vite image here)">
     <meta name="viewport" content="width=device-width">
@@ -19,11 +19,15 @@
         <center>
           <img src="/vite_in.gif" id="gif"></img>
           <br>
-          {% if error %}
-            <p>{{ error }}</p>
+          {% if errors %}
+            <p>{{ errors }}</p>
           {% endif %}
           {% if given %}
-            <b>Success! {{ amount }} VITE and {{ amount_token }} {{ token }} sent to {{ address }}</b>
+            {% if token %}
+              <b>Success! {{ amount }} VITE and {{ amount_token }} {{ token }} has been sent to {{ address }}. Please donate to {{ faucet_address }} to keep the faucet running!</b>
+            {% else %}
+              <b>Success! {{ amount }} has been sent to {{ address }}. Please donate to {{ faucet_address }} to keep the faucet running!</b>
+            {% endif %}
           {% else %}
             <button id="claim-button">CLAIM</button>
           {% endif %}

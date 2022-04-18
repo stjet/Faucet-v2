@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta property="og:title" content="{{ faucet_name }}">
+    <meta property="og:title" content="xDai Faucet">
     <meta property="og:description" content="Earn Free xDai!">
     <meta property="og:image" content="(xdai image here)">
     <meta name="viewport" content="width=device-width">
@@ -15,9 +15,9 @@
     <center>
     <div id="center">
       <h1 id="title">xDai Faucet</h2>
-      <p>Need gas? We gotcha covered. Please donate to {{ faucet_addr }}.</p>
-      {% if error %}
-        <p>{{ error }}</p>
+      <p>Need gas? We gotcha covered. Please donate to {{ faucet_address }}.</p>
+      {% if errors %}
+        <p>{{ errors }}</p>
       {% endif %}
       {% if given %}
         <p>Success! {{ amount }} sent to {{ address }}.</p>

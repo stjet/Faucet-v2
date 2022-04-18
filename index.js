@@ -64,6 +64,9 @@ if (config.enabled_coins.includes('banano')) {
       errors = "Too many claims from this IP address";
     }
 		//check faucet dry
+    if (await banano.dry()) {
+      errors = "Faucet dry";
+    }
 		//check captcha
     if (!captcha.came_from_site(req)) {
       errors = "Post request did not come from site";
@@ -133,9 +136,86 @@ if (config.enabled_coins.includes('banano')) {
   let claim_time_str = util.milliseconds_to_readable(config.nano.claim_frequency);
   let faucet_address = config.nano.address;
   async function nano_get_handler(req, res) {
+    let challenge_url, challenge_code, challenge_nonce;
+    if (captcha_use == "prussia_captcha") {
+			//pass these to nunjucks
+      let captcha_info = await captcha.get_captcha();
+			challenge_url = captcha_info[0];
+			challenge_code = captcha_info[1];
+			challenge_nonce = captcha_info[2];
+    }
+    return res.send(nunjucks.render('banano.html', {
+      claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: false, faucet_address: faucet_address, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, extra: extra, extensions: extensions
+    }));
   }
   async function nano_post_handler(req, res) {
+    let address = req.body.address;
+		let errors = false;
+		let amount = false;
+		let given = false;
+		let current_bal = await nano.check_bal(faucet_address);
+    let ip = req.header('x-forwarded-for');
+    if (ip_cache[ip] > 4) {
+      errors = "Too many claims from this IP address";
+    }
+    if (await nano.dry()) {
+      errors = "Faucet dry";
+    }
+    if (!captcha.came_from_site(req)) {
+      errors = "Post request did not come from site";
+    }
+		let success = await captcha.get_captcha_success(req.body);
+		if (!success) {
+			errors = "Failed or expired captcha";
+			//return
+		}
+		let too_soon_db = await util.claim_too_soon_db(address, "nano");
+		//check db
+		if (too_soon_db) {
+			errors = "Last claim too soon";
+		}
+		//check cookies
+		let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, "nano");
+		if (too_soon_cookies) {
+			errors = "Last claim too soon";
+		}
+		//payouts
+		let config_payouts = config.nano.payouts;
+		let challenge_url, challenge_code, challenge_nonce;
+		let payout = util.calculate_payouts(config_payouts);
+		//reduce payouts for suspicious accounts
+		if (config.unopened_reduced_payouts && await nano.is_unopened(address)) {
+			payout = config.nano.payouts.min_payout*0.5;
+		}
+		if (!errors) {
+		  let success = await nano.send(address, payout);
+		  if (!success) {
+		  	errors = "Send failed";
+		  } else {
+				given = true;
+				amount = payout;
+        if (ip_cache[ip]) {
+          ip_cache[ip] = ip_cache[ip]+1;
+        } else {
+          ip_cache[ip] = 1;
+        }
+			}
+		} else {
+      if (captcha_use == "prussia_captcha") {
+        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
+			}
+		}
+		return res.send(nunjucks.render('nano.html', {
+      claim_time_str: claim_time_str, faucet_name: faucet_name, captcha: captcha_use, given: given, amount: amount, faucet_address: faucet_address, current_bal: current_bal, errors: errors, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, extra: extra, extensions: extensions
+    }));
   }
+  if (config.nano.default) {
+    default_found = true;
+    app.get('/', nano_get_handler);
+  } else {
+    app.get('/nano', nano_get_handler);
+  }
+  app.post('/nano', nano_post_handler);
 } else if (config.enabled_coins.includes('xdai')) {
 	//
   let ip_cache = {};
@@ -146,9 +226,86 @@ if (config.enabled_coins.includes('banano')) {
   let claim_time_str = util.milliseconds_to_readable(config.xdai.claim_frequency);
   let faucet_address = config.xdai.address;
   async function xdai_get_handler(req, res) {
+    let challenge_url, challenge_code, challenge_nonce;
+    if (captcha_use == "prussia_captcha") {
+			//pass these to nunjucks
+      let captcha_info = await captcha.get_captcha();
+			challenge_url = captcha_info[0];
+			challenge_code = captcha_info[1];
+			challenge_nonce = captcha_info[2];
+    }
+    return res.send(nunjucks.render('xdai.html', {
+      //faucet_name, amount, faucet_address, errors,amount ,address, captcha
+      faucet_name: faucet_name, faucet_address: faucet_address, errors: false, captcha: captcha_use, given: false, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
+    });
   }
   async function xdai_post_handler(req, res) {
+    let address = req.body.address;
+		let errors = false;
+		let amount = false;
+		let given = false;
+    let ip = req.header('x-forwarded-for');
+    if (ip_cache[ip] > 4) {
+      errors = "Too many claims from this IP address";
+    }
+    if (await xdai.dry()) {
+      errors = "Faucet dry";
+    }
+    if (!captcha.came_from_site(req)) {
+      errors = "Post request did not come from site";
+    }
+		let success = await captcha.get_captcha_success(req.body);
+		if (!success) {
+			errors = "Failed or expired captcha";
+			//return
+		}
+		let too_soon_db = await util.claim_too_soon_db(address, "xdai");
+		//check db
+		if (too_soon_db) {
+			errors = "Last claim too soon";
+		}
+		//check cookies
+		let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, "xdai");
+		if (too_soon_cookies) {
+			errors = "Last claim too soon";
+		}
+		//payouts
+		let config_payouts = config.xdai.payouts;
+		let challenge_url, challenge_code, challenge_nonce;
+		let payout = util.calculate_payouts(config_payouts);
+		//reduce payouts for suspicious accounts
+		if (config.unopened_reduced_payouts && await xdai.is_unopened(address)) {
+			payout = config.xdai.payouts.min_payout*0.5;
+		}
+		if (!errors) {
+		  let success = await xdai.send(address, payout);
+		  if (!success) {
+		  	errors = "Send failed";
+		  } else {
+				given = true;
+				amount = payout;
+        if (ip_cache[ip]) {
+          ip_cache[ip] = ip_cache[ip]+1;
+        } else {
+          ip_cache[ip] = 1;
+        }
+			}
+		} else {
+      if (captcha_use == "prussia_captcha") {
+        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
+			}
+		}
+    return res.send(nunjucks.render('xdai.html', {
+      faucet_name: faucet_name, faucet_address: faucet_address, errors: errors, captcha: captcha_use, given: given, amount: amount, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
+    });
   }
+  if (config.xdai.default) {
+    default_found = true;
+    app.get('/', xdai_get_handler);
+  } else {
+    app.get('/xdai', xdai_get_handler);
+  }
+  app.post('/xdai', xdai_post_handler);
 } else if (config.enabled_coins.includes('vite')) {
   //
   let ip_cache = {};
@@ -158,10 +315,101 @@ if (config.enabled_coins.includes('banano')) {
   //turn this into claim time string
   let claim_time_str = util.milliseconds_to_readable(config.vite.claim_frequency);
   let faucet_address = config.vite.address;
+  //vite is special, in that we also want it to send tokens. should probably also do this for xdai eventually
   async function vite_get_handler(req, res) {
+    let challenge_url, challenge_code, challenge_nonce;
+    if (captcha_use == "prussia_captcha") {
+			//pass these to nunjucks
+      let captcha_info = await captcha.get_captcha();
+			challenge_url = captcha_info[0];
+			challenge_code = captcha_info[1];
+			challenge_nonce = captcha_info[2];
+    }
+    return res.send(nunjucks.render('vite.html', {
+      errors: false, given: false, captcha: use_captcha, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
+    });
   }
   async function vite_post_handler(req, res) {
+    let address = req.body.address;
+		let errors = false;
+		let amount = false;
+		let given = false;
+    let ip = req.header('x-forwarded-for');
+    if (ip_cache[ip] > 4) {
+      errors = "Too many claims from this IP address";
+    }
+    let send_token = true;
+    let send_vite = true;
+    let dry_info = await vite.dry();
+    if ((!dry_info[0] && !config.vite.optional) || (config.vite.token && !dry_info[1])) {
+      errors = "Faucet dry";
+    } else if (!dry_info[0]) {
+      send_vite = false;
+    } else if (!dry_info[1]) {
+      send_token = false;
+    }
+    if (!captcha.came_from_site(req)) {
+      errors = "Post request did not come from site";
+    }
+		let success = await captcha.get_captcha_success(req.body);
+		if (!success) {
+			errors = "Failed or expired captcha";
+			//return
+		}
+		let too_soon_db = await util.claim_too_soon_db(address, "vite");
+		//check db
+		if (too_soon_db) {
+			errors = "Last claim too soon";
+		}
+		//check cookies
+		let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, "vite");
+		if (too_soon_cookies) {
+			errors = "Last claim too soon";
+		}
+		//payouts
+		let config_payouts = config.xdai.payouts;
+		let challenge_url, challenge_code, challenge_nonce;
+		let payout = util.calculate_payouts(config_payouts);
+		//reduce payouts for suspicious accounts
+		if (config.unopened_reduced_payouts && await vite.is_unopened(address)) {
+			payout = config.vite.payouts.min_payout*0.5;
+		}
+		if (!errors) {
+      //with vite, we may want to send tokens also. Luckily, this is all handled in crypto/vite.js
+		  let success = await vite.send(address, payout, send_vite=send_vite, send_vite=send_vite);
+		  if (!success) {
+		  	errors = "Send failed";
+		  } else {
+				given = true;
+				amount = payout;
+        if (ip_cache[ip]) {
+          ip_cache[ip] = ip_cache[ip]+1;
+        } else {
+          ip_cache[ip] = 1;
+        }
+			}
+		} else {
+      if (captcha_use == "prussia_captcha") {
+        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
+			}
+		}
+    if (!config.vite.token) {
+      return res.send(nunjucks.render('vite.html', {
+        errors: errors, given: given, captcha: use_captcha, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: false
+      });
+    } else {
+      return res.send(nunjucks.render('vite.html', {
+        errors: errors, given: given, captcha: use_captcha, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: config.token.id, amount_token: config.vite.token.amount
+      });
+    }
   }
+  if (config.vite.default) {
+    default_found = true;
+    app.get('/', vite_get_handler);
+  } else {
+    app.get('/vite', vite_get_handler);
+  }
+  app.post('/vite', vite_post_handler);
 }
 
 if (!default_found) {

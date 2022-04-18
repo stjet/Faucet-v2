@@ -15,8 +15,8 @@
   <body>
     <center>
       <h1 id="title">Nano Faucet</h2>
-      {% if error %}
-        <p>{{ error }}</p>
+      {% if errors %}
+        <p>{{ errors }}</p>
       {% endif %}
       {% if given %}
         <p>Success, {{ amount }} sent to {{ address }}</p>

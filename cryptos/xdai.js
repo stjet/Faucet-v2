@@ -65,6 +65,17 @@ function address_related_to_blacklist(account_history, blacklisted_addresses) {
   return false
 }
 
+/*token stuff
+const token_contract_address = "";
+const token_abi = [];
+let token = new ethers.Contract(token_contract_addr, token_abi, wallet);
+async function send_token(address, amount) {
+  //assumes 18 decimal places, the standard for tokens. Change it if the amount of places is different
+  amount = ethers.utils.parseUnits(amount, 18);
+  return await token.transfer(addr, amount);
+}
+*/
+
 module.exports = {
   dry: dry,
   check_bal: check_bal,
