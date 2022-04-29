@@ -1,0 +1,15 @@
+{
+    "name": "Prussia-Faucet",
+    "version": "2.0.0",
+    "description": "A xdai, banano, nano, cryptocurrency faucet made by Prussia. And run by Prussia",
+    "main": "index.js",
+    "scripts": {
+      "main": "node index.js",
+      "packagesetup": "node config.js packagesetup"
+    },
+    "keywords": ["crypto", "faucet", "xdai", "banano", "nano"],
+    "author": "Jetstream0 <@prussia.dev>",
+    "license": "MIT",
+    "dependencies": {
+    }
+}

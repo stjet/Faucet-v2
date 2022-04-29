@@ -1,6 +1,6 @@
 const vite = require('@vite/vitejs');
 const { HTTP_RPC } = require('@vite/vitejs-http');
-const config = require("./config.js");
+const config = require("../config.js");
 
 //https://docs.vite.org/vite-docs/vite.js/
 //https://docs.vite.org/vite-docs/vite.js/accountBlock/createAccountBlock.html

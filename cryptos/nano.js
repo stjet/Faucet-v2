@@ -1,5 +1,5 @@
 const nanojs = require('nanojs');
-const config = require("./config.js");
+const config = require("../config.js");
 
 const rpc_url = config.nano.rpc
 

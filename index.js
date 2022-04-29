@@ -237,7 +237,7 @@ if (config.enabled_coins.includes('banano')) {
     return res.send(nunjucks.render('xdai.html', {
       //faucet_name, amount, faucet_address, errors,amount ,address, captcha
       faucet_name: faucet_name, faucet_address: faucet_address, errors: false, captcha: captcha_use, given: false, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
-    });
+    }));
   }
   async function xdai_post_handler(req, res) {
     let address = req.body.address;
@@ -297,7 +297,7 @@ if (config.enabled_coins.includes('banano')) {
 		}
     return res.send(nunjucks.render('xdai.html', {
       faucet_name: faucet_name, faucet_address: faucet_address, errors: errors, captcha: captcha_use, given: given, amount: amount, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
-    });
+    }));
   }
   if (config.xdai.default) {
     default_found = true;
@@ -326,8 +326,8 @@ if (config.enabled_coins.includes('banano')) {
 			challenge_nonce = captcha_info[2];
     }
     return res.send(nunjucks.render('vite.html', {
-      errors: false, given: false, captcha: use_captcha, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
-    });
+      errors: false, given: false, captcha: captcha_use, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce
+    }));
   }
   async function vite_post_handler(req, res) {
     let address = req.body.address;
@@ -367,9 +367,12 @@ if (config.enabled_coins.includes('banano')) {
 			errors = "Last claim too soon";
 		}
 		//payouts
-		let config_payouts = config.xdai.payouts;
+		let config_payouts = config.vite.payouts;
 		let challenge_url, challenge_code, challenge_nonce;
 		let payout = util.calculate_payouts(config_payouts);
+    if (payout === 0) {
+      send_vite = false;
+    }
 		//reduce payouts for suspicious accounts
 		if (config.unopened_reduced_payouts && await vite.is_unopened(address)) {
 			payout = config.vite.payouts.min_payout*0.5;
@@ -395,12 +398,12 @@ if (config.enabled_coins.includes('banano')) {
 		}
     if (!config.vite.token) {
       return res.send(nunjucks.render('vite.html', {
-        errors: errors, given: given, captcha: use_captcha, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: false
+        errors: errors, given: given, captcha: captcha_use, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: false
       });
     } else {
       return res.send(nunjucks.render('vite.html', {
-        errors: errors, given: given, captcha: use_captcha, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: config.token.id, amount_token: config.vite.token.amount
-      });
+        errors: errors, given: given, captcha: captcha_use, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: config.token.id, amount_token: config.vite.token.amount
+      }));
     }
   }
   if (config.vite.default) {

@@ -1,5 +1,5 @@
 const { ethers } = require("ethers");
-const config = require("./config.js");
+const config = require("../config.js");
 const fetch = require('node-fetch');
 
 const rpc_url = config.xdai.rpc;

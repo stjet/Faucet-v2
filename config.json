@@ -45,7 +45,6 @@
       "percentage": false
     }
   },
-  ,
   "vite": {
     "claim_frequency": 86400000,
     "enabled": true,
