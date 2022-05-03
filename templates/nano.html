@@ -22,7 +22,7 @@
         <p>Success, {{ amount }} sent to {{ address }}</p>
       {% endif %}
       <form method="POST" action="/nano" id="form">
-        <label for="address">Nano Address:</label><input id="address" type="text" name="addr">
+        <label for="address">Nano Address:</label><input id="address" type="text" name="address">
         {% if captcha == 'hcaptcha' %}
           <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
         {% elif captcha == 'prussia_captcha' %}

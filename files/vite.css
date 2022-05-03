@@ -92,3 +92,7 @@ input[type="submit"] {
 #challenge-img {
   width: 100%;
 }
+
+#close-modal {
+  float: right;
+}

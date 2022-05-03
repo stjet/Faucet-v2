@@ -46,8 +46,9 @@
     </div>
     <div id="claim-modal-container" style="display: none;">
       <div id="claim-modal">
+        <button id="close-modal">Close</button>
         <form method="POST" action="/vite" id="form">
-          <label for="address">Vite Address:</label><input id="address" type="text" name="addr">
+          <label for="address">Vite Address:</label><input id="address" type="text" name="address">
           <br>
           {% if captcha == 'hcaptcha' %}
             <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
@@ -68,6 +69,9 @@
     <script>
       document.getElementById('claim-button').onclick = function() {
         document.getElementById('claim-modal-container').style.display = 'block';
+      }
+      document.getElementById('close-modal').onclick = function() {
+        document.getElementById('claim-modal-container').style.display = 'none';
       }
     </script>
   </body>

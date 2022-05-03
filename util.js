@@ -76,6 +76,15 @@ async function count(query, coin) {
   return await collections[coin].count(query);
 }
 
+async function add_to_db(address, coin) {
+  let address_info = await find(address, coin);
+	if (!address_info) {
+		await insert(address, Date.now(), coin);
+	} else {
+    await replace(address, Date.now(), coin);
+  }
+}
+
 async function claim_too_soon_db(address, coin) {
 	let address_info = await find(address, coin);
 	if (!address_info) {
@@ -88,7 +97,14 @@ async function claim_too_soon_db(address, coin) {
 	}
 }
 
+function add_to_cookies(res, coin) {
+  res.cookie('last_claim_'+coin, String(Date.now()));
+}
+
 async function claim_too_soon_cookies(req_cookies, coin) {
+  if (!req_cookies["last_claim_"+coin]) {
+    return false;
+  }
 	if (Date.now() > Number(req_cookies["last_claim_"+coin])+config[coin].claim_frequency) {
 		return false;
 	}
@@ -140,5 +156,7 @@ module.exports = {
 	claim_too_soon_db: claim_too_soon_db,
 	claim_too_soon_cookies: claim_too_soon_cookies,
 	count_decimals: count_decimals,
-	calculate_payouts: calculate_payouts
+	calculate_payouts: calculate_payouts,
+  add_to_db: add_to_db,
+  add_to_cookies: add_to_cookies
 }

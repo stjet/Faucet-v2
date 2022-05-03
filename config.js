@@ -102,7 +102,7 @@ if (process.argv[2] == "packagesetup") {
 
   //description, dependencies, keywords
   //add node fetch to deps? or maybe axios
-  let dependencies = {'nunjucks': '^3.2.3', 'express': '^4.17.1', 'body-parser': '^1.19.0', 'cookie-parser': '^1.4.5', 'mongodb': '^3.6.6', 'node-fetch': '2.6.7'};
+  let dependencies = {'nunjucks': '^3.2.3', 'express': '^4.17.1', 'body-parser': '^1.19.0', 'cookie-parser': '^1.4.5', 'mongodb': '^3.6.6', 'node-fetch': '2.6.7', 'big.js': '6.1.1'};
   let coin_deps = {
     'xdai': ['ethers', '^5.5.1'],
     'banano': ['bananojs', 'npm:@bananocoin/bananojs@^2.4.24'],

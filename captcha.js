@@ -16,7 +16,7 @@ async function prussia_captcha_request() {
 async function prussia_captcha(req_body) {
   let code = req_body['code'];
   let nonce = req_body['nonce'];
-  let guess = req_body['guess'];
+  let guess = req_body['answer'];
   let params = new URLSearchParams();
   params.append('code', code);
   params.append('nonce', nonce);

@@ -57,7 +57,8 @@
     },
     "token": {
       "id": "",
-      "amount": 1
+      "amount": 1,
+      "decimals": 0
     },
     "optional": true
   },

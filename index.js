@@ -110,6 +110,8 @@ if (config.enabled_coins.includes('banano')) {
         } else {
           ip_cache[ip] = 1;
         }
+        await util.add_to_db(address, 'banano');
+        util.add_to_cookies(res, 'banano');
 			}
 		} else {
       if (captcha_use == "prussia_captcha") {
@@ -199,6 +201,8 @@ if (config.enabled_coins.includes('banano')) {
         } else {
           ip_cache[ip] = 1;
         }
+        await util.add_to_db(address, 'nano');
+        util.add_to_cookies(res, 'nano');
 			}
 		} else {
       if (captcha_use == "prussia_captcha") {
@@ -289,6 +293,8 @@ if (config.enabled_coins.includes('banano')) {
         } else {
           ip_cache[ip] = 1;
         }
+        await util.add_to_db(address, 'xdai');
+        util.add_to_cookies(res, 'xdai');
 			}
 		} else {
       if (captcha_use == "prussia_captcha") {
@@ -307,9 +313,12 @@ if (config.enabled_coins.includes('banano')) {
   }
   app.post('/xdai', xdai_post_handler);
 } else if (config.enabled_coins.includes('vite')) {
-  //
   let ip_cache = {};
   vite = require('./cryptos/vite.js');
+  vite.receive.start({
+    checkTime: 3000,
+    transctionNumber: 10
+  });
 	let extra = {};
 	let extensions = {};
   //turn this into claim time string
@@ -341,7 +350,7 @@ if (config.enabled_coins.includes('banano')) {
     let send_token = true;
     let send_vite = true;
     let dry_info = await vite.dry();
-    if ((!dry_info[0] && !config.vite.optional) || (config.vite.token && !dry_info[1])) {
+    if ((dry_info[0] && !config.vite.optional) || (config.vite.token && dry_info[1])) {
       errors = "Faucet dry";
     } else if (!dry_info[0]) {
       send_vite = false;
@@ -379,7 +388,7 @@ if (config.enabled_coins.includes('banano')) {
 		}
 		if (!errors) {
       //with vite, we may want to send tokens also. Luckily, this is all handled in crypto/vite.js
-		  let success = await vite.send(address, payout, send_vite=send_vite, send_vite=send_vite);
+		  let success = await vite.send(address, payout, send_vite=send_vite, send_token=send_token);
 		  if (!success) {
 		  	errors = "Send failed";
 		  } else {
@@ -390,6 +399,8 @@ if (config.enabled_coins.includes('banano')) {
         } else {
           ip_cache[ip] = 1;
         }
+        await util.add_to_db(address, 'vite');
+        util.add_to_cookies(res, 'vite');
 			}
 		} else {
       if (captcha_use == "prussia_captcha") {
@@ -399,10 +410,10 @@ if (config.enabled_coins.includes('banano')) {
     if (!config.vite.token) {
       return res.send(nunjucks.render('vite.html', {
         errors: errors, given: given, captcha: captcha_use, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: false
-      });
+      }));
     } else {
       return res.send(nunjucks.render('vite.html', {
-        errors: errors, given: given, captcha: captcha_use, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: config.token.id, amount_token: config.vite.token.amount
+        errors: errors, given: given, captcha: captcha_use, challenge_url: challenge_url, challenge_code: challenge_code, challenge_nonce: challenge_nonce, amount: amount, address: address, faucet_address: faucet_address, token: config.vite.token.id, amount_token: config.vite.token.amount
       }));
     }
   }
@@ -421,7 +432,7 @@ if (!default_found) {
   });
 }
 
-app.listen(8081, async () => {
+app.listen(8080, async () => {
   //recieve banano deposits
   if (config.enabled_coins.includes('banano')) {
     await banano.receive_deposits();
