@@ -3,11 +3,9 @@ const mongo = require('./mongo.js');
 
 // Convert milliseconds to days, hours, and minutes, and then formats the result using a truth table.
 function milliseconds_to_readable(milliseconds) {
-  let timeTimesTwo = milliseconds * 2;
-  let diffMilliseconds = timeTimesTwo - milliseconds;
-  let diffDays = Math.floor(diffMilliseconds / 86400000);
-  let diffHrs = Math.floor((diffMilliseconds % 86400000) / 3600000);
-  let diffMins = Math.round(((diffMilliseconds % 86400000) % 3600000) / 60000);
+  let diffDays = Math.floor(milliseconds / 86400000);
+  let diffHrs = Math.floor((milliseconds % 86400000) / 3600000);
+  let diffMins = Math.round(((milliseconds % 86400000) % 3600000) / 60000);
   const formatResult = (days, hours, minutes) => {
     // Without this it might display '23 hours and 60 minutes'.
     if (diffMins >= 60) {
