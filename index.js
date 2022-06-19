@@ -120,7 +120,7 @@ if (config.enabled_coins.includes('banano')) {
         errors = 'Send failed';
       } else {
         given = true;
-        amount = format_amount_decimals(payout);
+        amount = util.format_amount_decimals(payout);
         if (ip_cache[ip]) {
           ip_cache[ip] = ip_cache[ip] + 1;
         } else {
@@ -238,7 +238,7 @@ if (config.enabled_coins.includes('banano')) {
         errors = 'Send failed';
       } else {
         given = true;
-        amount = format_amount_decimals(payout);
+        amount = util.format_amount_decimals(payout);
         if (ip_cache[ip]) {
           ip_cache[ip] = ip_cache[ip] + 1;
         } else {
@@ -353,7 +353,7 @@ if (config.enabled_coins.includes('banano')) {
         errors = 'Send failed';
       } else {
         given = true;
-        amount = format_amount_decimals(payout);
+        amount = util.format_amount_decimals(payout);
         if (ip_cache[ip]) {
           ip_cache[ip] = ip_cache[ip] + 1;
         } else {
@@ -476,7 +476,7 @@ if (config.enabled_coins.includes('banano')) {
         errors = 'Send failed';
       } else {
         given = true;
-        amount = format_amount_decimals(payout);
+        amount = util.format_amount_decimals(payout);
         if (ip_cache[ip]) {
           ip_cache[ip] = ip_cache[ip] + 1;
         } else {
