@@ -1,6 +1,24 @@
 const config = require('./config.js');
 const mongo = require('./mongo.js');
 
+// Returns the number of decimals in a number. If higher of equal to 1 returns -1.
+function get_number_decimal_zeros(number) {
+  return -Math.floor(Math.log10(number) + 1);
+}
+
+function truncate_to_decimals(number, decimals) {
+  const calculateDecimals = Math.pow(10, decimals);
+  return Math.trunc(number * calculateDecimals) / calculateDecimals;
+}
+
+function format_amount_decimals(amount) {
+  if (amount >= 0.1) {
+    return truncate_to_decimals(amount, 2);
+  } else {
+    return truncate_to_decimals(amount, get_number_decimal_zeros(amount) + 2);
+  }
+}
+
 // Convert milliseconds to days, hours, and minutes, and then formats the result using a truth table.
 function milliseconds_to_readable(milliseconds) {
   let diffDays = Math.floor(milliseconds / 86400000);
@@ -9,7 +27,7 @@ function milliseconds_to_readable(milliseconds) {
   const formatResult = (days, hours, minutes) => {
     // Without this it might display '23 hours and 60 minutes'.
     if (diffMins >= 60) {
-      diffMins --
+      diffMins--;
     }
     // Singular and plural logic or false if 0.
     if (minutes == 0) {
@@ -34,30 +52,30 @@ function milliseconds_to_readable(milliseconds) {
       days = `${diffDays} days`;
     }
     // Truth table.
-		if (days && hours && minutes) {
-		  return `${days}, ${hours} and ${minutes}`;
-		}
-		if (days && hours) {
-		  return `${days} and ${hours}`;
-		}
-		if (days && minutes) {
-		  return `${days} and ${minutes}`;
-		}
-		if (hours && minutes) {
-		  return `${hours} and ${minutes}`;
-		}
-		if (days) {
+    if (days && hours && minutes) {
+      return `${days}, ${hours} and ${minutes}`;
+    }
+    if (days && hours) {
+      return `${days} and ${hours}`;
+    }
+    if (days && minutes) {
+      return `${days} and ${minutes}`;
+    }
+    if (hours && minutes) {
+      return `${hours} and ${minutes}`;
+    }
+    if (days) {
       return `${days}`;
-		}
-		if (hours) {
+    }
+    if (hours) {
       return `${hours}`;
-		}
-		if (minutes) {
+    }
+    if (minutes) {
       return `${minutes}`;
-		}
+    }
     if (!minutes && !hours && !days && diffMins < 1) {
       return `Less than one minute`;
-    };
+    }
   };
   return formatResult(diffDays, diffHrs, diffMins);
 }
