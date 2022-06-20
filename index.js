@@ -161,7 +161,8 @@ if (config.enabled_coins.includes('banano')) {
     app.get('/banano', banano_get_handler);
   }
   app.post('/banano', banano_post_handler);
-} else if (config.enabled_coins.includes('nano')) {
+}
+if (config.enabled_coins.includes('nano')) {
   let ip_cache = {};
   nano = require('./cryptos/nano.js');
   let extra = {};
@@ -277,7 +278,8 @@ if (config.enabled_coins.includes('banano')) {
     app.get('/nano', nano_get_handler);
   }
   app.post('/nano', nano_post_handler);
-} else if (config.enabled_coins.includes('xdai')) {
+}
+if (config.enabled_coins.includes('xdai')) {
   //
   let ip_cache = {};
   xdai = require('./cryptos/xdai.js');
@@ -388,7 +390,8 @@ if (config.enabled_coins.includes('banano')) {
     app.get('/xdai', xdai_get_handler);
   }
   app.post('/xdai', xdai_post_handler);
-} else if (config.enabled_coins.includes('vite')) {
+}
+if (config.enabled_coins.includes('vite')) {
   let ip_cache = {};
   vite = require('./cryptos/vite.js');
   vite.receive.start({
@@ -541,7 +544,9 @@ if (!default_found) {
 app.listen(8080, async () => {
   //recieve banano deposits (nano's POW is much more expensive, so public nodes don't like it when receive_deposits is called)
   if (config.enabled_coins.includes('banano')) {
-    await banano.receive_deposits();
+    if (config.banano.auto_receive) {
+      await banano.receive_deposits();
+    }
   }
   console.log(`App on`);
 });
