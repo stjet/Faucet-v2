@@ -23,7 +23,7 @@ app.use(cookieParser());
 //based on config currencies, set up web servers and import currencies
 
 const captcha_use = config.captcha.use;
-const faucet_name = config.faucet;
+const faucet_name = config.name;
 
 let default_found = false;
 

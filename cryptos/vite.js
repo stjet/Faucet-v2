@@ -44,6 +44,7 @@ async function check_bal(address) {
   let resp = await provider.request('ledger_getAccountInfoByAddress', address);
   //this is vite
   let token_resp = resp.balanceInfoMap?.[token_id]
+  //token id of VITE
   let vite_resp = resp.balanceInfoMap['tti_5649544520544f4b454e6e40'];
   if (config.vite.token) {
     let re = [];
