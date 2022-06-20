@@ -23,7 +23,7 @@ app.use(cookieParser());
 //based on config currencies, set up web servers and import currencies
 
 const captcha_use = config.captcha.use;
-const faucet_name = config.faucet_name;
+const faucet_name = config.faucet;
 
 let default_found = false;
 
@@ -53,7 +53,7 @@ if (config.enabled_coins.includes('banano')) {
     return res.send(
       nunjucks.render('banano.html', {
         claim_time_str: claim_time_str,
-        faucet_name: faucet_name,
+        faucet_name: faucet_name.replace("<coin>", "Banano"),
         captcha: captcha_use,
         given: false,
         amount: false,
@@ -137,7 +137,7 @@ if (config.enabled_coins.includes('banano')) {
     return res.send(
       nunjucks.render('banano.html', {
         claim_time_str: claim_time_str,
-        faucet_name: faucet_name,
+        faucet_name: faucet_name.replace("<coin>", "Banano"),
         captcha: captcha_use,
         given: given,
         amount: amount,
@@ -179,9 +179,9 @@ if (config.enabled_coins.includes('banano')) {
       challenge_nonce = captcha_info[2];
     }
     return res.send(
-      nunjucks.render('banano.html', {
+      nunjucks.render('nano.html', {
         claim_time_str: claim_time_str,
-        faucet_name: faucet_name,
+        faucet_name: faucet_name.replace("<coin>", "Nano"),
         captcha: captcha_use,
         given: false,
         faucet_address: faucet_address,
@@ -255,7 +255,7 @@ if (config.enabled_coins.includes('banano')) {
     return res.send(
       nunjucks.render('nano.html', {
         claim_time_str: claim_time_str,
-        faucet_name: faucet_name,
+        faucet_name: faucet_name.replace("<coin>", "Nano"),
         captcha: captcha_use,
         given: given,
         amount: amount,
@@ -298,7 +298,7 @@ if (config.enabled_coins.includes('banano')) {
     return res.send(
       nunjucks.render('xdai.html', {
         //faucet_name, amount, faucet_address, errors,amount ,address, captcha
-        faucet_name: faucet_name,
+        faucet_name: faucet_name.replace("<coin>", "xDai"),
         faucet_address: faucet_address,
         errors: false,
         captcha: captcha_use,
@@ -534,12 +534,12 @@ if (config.enabled_coins.includes('banano')) {
 
 if (!default_found) {
   app.get('/', async function (req, res) {
-    return res.send(nunjucks.render('main.html', { faucet_name: faucet_name, enabled_coins: config.enabled_coins }));
+    return res.send(nunjucks.render('main.html', { faucet_name: faucet_name.replace("<coin>", ""), enabled_coins: config.enabled_coins }));
   });
 }
 
 app.listen(8080, async () => {
-  //recieve banano deposits
+  //recieve banano deposits (nano's POW is much more expensive, so public nodes don't like it when receive_deposits is called)
   if (config.enabled_coins.includes('banano')) {
     await banano.receive_deposits();
   }
