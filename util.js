@@ -91,12 +91,12 @@ db.then((db) => {
   }
 });
 
-async function insert(address, value, coin) {
-  await collections[coin].insertOne({ address: address, value: value });
+async function insert(address, last_claim, coin) {
+  await collections[coin].insertOne({ address: address, last_claim: last_claim });
 }
 
-async function replace(address, newvalue, coin) {
-  await collections[coin].replaceOne({ address: address }, { address: address, value: newvalue });
+async function replace(address, new_last_claim, coin) {
+  await collections[coin].replaceOne({ address: address }, { address: address, last_claim: new_last_claim });
 }
 
 async function find(address, coin) {
@@ -121,7 +121,7 @@ async function claim_too_soon_db(address, coin) {
   if (!address_info) {
     return false;
   }
-  if (Date.now() > address_info.value + config[coin].claim_frequency) {
+  if (Date.now() > address_info.last_claim + config[coin].claim_frequency) {
     return false;
   } else {
     return true;

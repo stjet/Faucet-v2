@@ -7,7 +7,7 @@ const rpc_url = config.xdai.rpc;
 const provider = new ethers.providers.JsonRpcProvider(rpc_url);
 const signer = provider.getSigner();
 
-const privkey;
+let privkey;
 if (config.secrets.use_env) {
   privkey = process.env.eth_privkey;
 } else {

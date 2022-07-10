@@ -9,7 +9,7 @@ if (config.nano.auth) {
   nanojs.setAuth(config.nano.auth)
 }
 
-const seed;
+let seed;
 if (config.secrets.use_env) {
   seed = process.env.bn_seed;
 } else {
