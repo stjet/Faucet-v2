@@ -156,11 +156,11 @@ if (config.enabled_coins.includes('banano')) {
   if (config.banano.default) {
     default_found = true;
     app.get('/', banano_get_handler);
-    //post will go to /banano no matter the default (4 lines from now)
+    app.post('/', banano_post_handler);
   } else {
     app.get('/banano', banano_get_handler);
+    app.post('/banano', banano_post_handler);
   }
-  app.post('/banano', banano_post_handler);
 }
 if (config.enabled_coins.includes('nano')) {
   let ip_cache = {};
@@ -274,10 +274,11 @@ if (config.enabled_coins.includes('nano')) {
   if (config.nano.default) {
     default_found = true;
     app.get('/', nano_get_handler);
+    app.post('/', nano_post_handler);
   } else {
     app.get('/nano', nano_get_handler);
+    app.post('/nano', nano_post_handler);
   }
-  app.post('/nano', nano_post_handler);
 }
 if (config.enabled_coins.includes('xdai')) {
   //
@@ -386,10 +387,11 @@ if (config.enabled_coins.includes('xdai')) {
   if (config.xdai.default) {
     default_found = true;
     app.get('/', xdai_get_handler);
+    app.post('/', xdai_post_handler);
   } else {
     app.get('/xdai', xdai_get_handler);
+    app.post('/xdai', xdai_post_handler);
   }
-  app.post('/xdai', xdai_post_handler);
 }
 if (config.enabled_coins.includes('vite')) {
   let ip_cache = {};
@@ -529,10 +531,11 @@ if (config.enabled_coins.includes('vite')) {
   if (config.vite.default) {
     default_found = true;
     app.get('/', vite_get_handler);
+    app.post('/', vite_post_handler);
   } else {
     app.get('/vite', vite_get_handler);
+    app.post('/vite', vite_post_handler);
   }
-  app.post('/vite', vite_post_handler);
 }
 
 if (!default_found) {

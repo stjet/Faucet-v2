@@ -12,7 +12,7 @@ if (config.secrets.use_env) {
   seed = config.secrets.bn_seed;
 }
 
-let blacklisted_addresses = config.blacklist;
+let blacklisted_addresses = config.blacklist.banano;
 
 //amount is in whole banano, not raw. Eg: amount=4.2 sends 4.2 banano
 async function send(address, amount) {
@@ -56,8 +56,8 @@ function address_related_to_blacklist(account_history) {
   return false;
 }
 
-async function is_unopened(address) {
-  let account_history = await bananojs.getAccountHistory(address, -1);
+async function is_unopened(address, amount=-1) {
+  let account_history = await bananojs.getAccountHistory(address, amount);
   if (account_history.history == '') {
     return true;
   }
@@ -90,14 +90,14 @@ async function account_creation(account_history) {
 }
 
 async function is_funneling(account_history) {
-  account_history = account_history.slice(0,100);
+  //account_history = account_history.slice(0,100);
   let sent_to = {};
-  for (let i=0; i < account_history.history.length; i++) {
-    if (account_history.history[i].type == "send" && !known_accounts.includes(account_history.history[i].account)) {
-      if (sent_to[account_history.history[i].account]) {
-        sent_to[account_history.history[i].account] += 1;
+  for (let i=0; i < account_history.length; i++) {
+    if (account_history[i].type == "send" && !blacklisted_addresses.includes(account_history[i].account)) {
+      if (sent_to[account_history[i].account]) {
+        sent_to[account_history[i].account] += 1;
       } else {
-        sent_to[account_history.history[i].account] = 1;
+        sent_to[account_history[i].account] = 1;
       }
     }
   }
@@ -116,15 +116,15 @@ async function is_funneling(account_history) {
 
 async function get_score(address) {
 	let score = 0;
-	let account_history = await get_account_history(address);
+	let account_history = await get_account_history(address, 500);
 	let unopened = await is_unopened(address);
-	if (await isUnopened(address)) {
+	if (await is_unopened(address)) {
     score += 4;
 		return score;
   } else {
-    let account_creation = await accountCreation(account_history);
-		if (account_creation) {
-      if (account_creation < 60*60*24*7) {
+    let creation = await account_creation(account_history);
+		if (creation) {
+      if (creation < 60*60*24*7) {
         score += 3;
       }
 		}
