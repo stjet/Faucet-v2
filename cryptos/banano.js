@@ -26,7 +26,7 @@ async function send(address, amount) {
 
 async function get_account_history(address) {
   let account_history = await bananojs.getAccountHistory(address, -1);
-	return account_history.history;
+  return account_history.history;
 }
 
 //precision to 2 digits, round down (floor)
@@ -81,10 +81,10 @@ async function is_valid(address) {
 //Following functions are related to get_score function. return score where higher number means high suspicion. this is only to strain out suspicious addresses from a mass of addresses. a high number does not mean an address is definitely a bot/cheating account and vice versa.
 async function account_creation(account_history) {
   let current_time = Math.round(new Date().getTime()/1000);
-	//3500 is the maximum amount of transactions the lib will return. If more or equal to 3500, we dont know the true age, but its probably old
-	if (account_history.length >= 3500) {
-		return false;
-	}
+  //3500 is the maximum amount of transactions the lib will return. If more or equal to 3500, we dont know the true age, but its probably old
+  if (account_history.length >= 3500) {
+    return false;
+  }
   let account_creation = Number(account_history[account_history.length-1].local_timestamp);
   return current_time-account_creation;
 }
@@ -115,38 +115,38 @@ async function is_funneling(account_history) {
 }
 
 async function get_score(address) {
-	let score = 0;
-	let account_history = await get_account_history(address, 500);
-	let unopened = await is_unopened(address);
-	if (await is_unopened(address)) {
+  let score = 0;
+  let account_history = await get_account_history(address, 500);
+  let unopened = await is_unopened(address);
+  if (await is_unopened(address)) {
     score += 4;
-		return score;
+    return score;
   } else {
     let creation = await account_creation(account_history);
-		if (creation) {
+    if (creation) {
       if (creation < 60*60*24*7) {
         score += 3;
       }
-		}
+    }
   }
-	if (address_related_to_blacklist(account_history)) {
-		score += 10;
-	}
-	let balance = await check_bal(address);
-	if (balance < 0.1) {
+  if (address_related_to_blacklist(account_history)) {
+    score += 10;
+  }
+  let balance = await check_bal(address);
+  if (balance < 0.1) {
     score += 3;
   } else if (balance < 1) {
     score += 1;
   }
-	let funneling = await is_funneling(account_history);
-	if (funneling) {
-		score += 3;
-	}
-	let ratioBalanceHistory = balance/account_history.length;
-	if (ratioBalanceHistory < 1/4) {
-		score += 4;
-	}
-	return score;
+  let funneling = await is_funneling(account_history);
+  if (funneling) {
+    score += 3;
+  }
+  let ratioBalanceHistory = balance/account_history.length;
+  if (ratioBalanceHistory < 1/4) {
+    score += 4;
+  }
+  return score;
 }
 
 module.exports = {
@@ -158,5 +158,5 @@ module.exports = {
   is_unopened: is_unopened,
   get_account_history: get_account_history,
   is_valid: is_valid,
-	get_score: get_score
+  get_score: get_score
 }
