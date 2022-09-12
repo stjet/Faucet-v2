@@ -48,7 +48,7 @@ Additional security for prussia captcha probably needed.
 function came_from_site(req) {
   if (config.self) {
     let host = req.get('host');
-    if (host == config.self) {
+    if (host.toLowerCase() == config.self.toLowerCase()) {
       return true;
     } else {
       return false;
