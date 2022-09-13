@@ -20,7 +20,7 @@ wallet = wallet.connect(provider);
 async function send(address, amount) {
   let transaction = {
     to: address.toLowerCase(),
-    value: ethers.utils.parseEther(amount),
+    value: ethers.utils.parseEther(String(amount)),
   };
   try {
     wallet.sendTransaction(transaction)
@@ -35,8 +35,8 @@ async function check_bal(address) {
   return ethers.utils.formatEther(await provider.getBalance(address));
 }
 
-async function dry(address) {
-  if (Number(await check_bal(address)) > 0.06) {
+async function dry() {
+  if (Number(await check_bal(config.xdai.address)) > 0.02) {
     return false;
   }
   return true;

@@ -372,8 +372,9 @@ if (config.enabled_coins.includes('xdai')) {
     }
     return res.send(
       nunjucks.render('xdai.html', {
-        faucet_name: faucet_name,
+        faucet_name: faucet_name.replace("<coin>", "xDai"),
         faucet_address: faucet_address,
+        address: address,
         errors: errors,
         captcha: captcha_use,
         given: given,
