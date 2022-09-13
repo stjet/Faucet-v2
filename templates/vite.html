@@ -47,7 +47,12 @@
     <div id="claim-modal-container" style="display: none;">
       <div id="claim-modal">
         <button id="close-modal">Close</button>
-        <form method="POST" action="/vite" id="form">
+        <form method="POST" {% if is_default %}
+            action="/"
+          {% else %}
+            action="/banano"
+          {% endif %}
+        id="faucet-form">
           <label for="address">Vite Address:</label><input id="address" type="text" name="address">
           <br>
           {% if captcha == 'hcaptcha' %}

@@ -65,6 +65,7 @@ if (config.enabled_coins.includes('banano')) {
         challenge_nonce: challenge_nonce,
         extra: extra,
         extensions: extensions,
+        is_default: config.banano.default
       })
     );
   }
@@ -149,6 +150,7 @@ if (config.enabled_coins.includes('banano')) {
         challenge_nonce: challenge_nonce,
         extra: extra,
         extensions: extensions,
+        is_default: config.banano.default
       })
     );
   }
@@ -191,6 +193,7 @@ if (config.enabled_coins.includes('nano')) {
         challenge_nonce: challenge_nonce,
         extra: extra,
         extensions: extensions,
+        is_default: config.nano.default
       })
     );
   }
@@ -268,6 +271,7 @@ if (config.enabled_coins.includes('nano')) {
         challenge_nonce: challenge_nonce,
         extra: extra,
         extensions: extensions,
+        is_default: config.nano.default
       })
     );
   }
@@ -309,6 +313,7 @@ if (config.enabled_coins.includes('xdai')) {
         challenge_url: challenge_url,
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
+        is_default: config.xdai.default
       })
     );
   }
@@ -382,6 +387,7 @@ if (config.enabled_coins.includes('xdai')) {
         challenge_url: challenge_url,
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
+        is_default: config.xdai.default
       })
     );
   }
@@ -424,6 +430,7 @@ if (config.enabled_coins.includes('vite')) {
         challenge_url: challenge_url,
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
+        is_default: config.vite.default
       })
     );
   }
@@ -509,6 +516,7 @@ if (config.enabled_coins.includes('vite')) {
           address: address,
           faucet_address: faucet_address,
           token: false,
+          is_default: config.vite.default
         })
       );
     } else {
@@ -525,6 +533,7 @@ if (config.enabled_coins.includes('vite')) {
           faucet_address: faucet_address,
           token: config.vite.token.id,
           amount_token: config.vite.token.amount,
+          is_default: config.vite.default
         })
       );
     }
