@@ -60,7 +60,7 @@ for (let c_num = 0; c_num < coins.length; c_num++) {
   if (config[coin] == undefined) {
     config[coin] = {enabled: false};
   }
-  let default_rpcs = ['https://rpc.gnosischain.com', 'https://kaliumapi.appditto.com/api', 'https://mynano.ninja/api/node', 'https://node.vite.net/http'];
+  let default_rpcs = ['https://rpc.gnosischain.com', 'https://kaliumapi.appditto.com/api', 'https://proxy.nanos.cc/proxy', 'https://node.vite.net/http'];
   if (config[coin].enabled) {
     enabled_coins.push(coin);
 

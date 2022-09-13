@@ -40,7 +40,7 @@ async function check_bal(address) {
 async function dry() {
   let bal = await check_bal(config.nano.address);
   //future: make this relative to payouts
-  if (Number(bal) < 1) {
+  if (Number(bal) < 0.1) {
     return true;
   }
   return false;

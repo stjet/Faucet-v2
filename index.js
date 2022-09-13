@@ -173,6 +173,7 @@ if (config.enabled_coins.includes('nano')) {
   let claim_time_str = util.milliseconds_to_readable(config.nano.claim_frequency);
   let faucet_address = config.nano.address;
   async function nano_get_handler(req, res) {
+    let current_bal = await nano.check_bal(faucet_address);
     let challenge_url, challenge_code, challenge_nonce;
     if (captcha_use == 'prussia_captcha') {
       //pass these to nunjucks
@@ -188,6 +189,7 @@ if (config.enabled_coins.includes('nano')) {
         captcha: captcha_use,
         given: false,
         faucet_address: faucet_address,
+        current_bal: current_bal,
         challenge_url: challenge_url,
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
@@ -264,6 +266,7 @@ if (config.enabled_coins.includes('nano')) {
         given: given,
         amount: amount,
         faucet_address: faucet_address,
+        address: address,
         current_bal: current_bal,
         errors: errors,
         challenge_url: challenge_url,
@@ -446,11 +449,10 @@ if (config.enabled_coins.includes('vite')) {
     let send_token = true;
     let send_vite = true;
     let dry_info = await vite.dry();
-    if ((dry_info[0] && !config.vite.optional) || (config.vite.token && dry_info[1])) {
+    //sending the token is optional
+    if ((dry_info.coin) || (config.vite.token && dry_info.token && !config.vite.optional)) {
       errors = 'Faucet dry';
-    } else if (!dry_info[0]) {
-      send_vite = false;
-    } else if (!dry_info[1]) {
+    } else if (config.vite.token && dry_info.token && config.vite.optional) {
       send_token = false;
     }
     if (!captcha.came_from_site(req)) {
@@ -484,7 +486,7 @@ if (config.enabled_coins.includes('vite')) {
     }
     if (!errors) {
       //with vite, we may want to send tokens also. Luckily, this is all handled in crypto/vite.js
-      let success = await vite.send(address, payout, (send_vite = send_vite), (send_token = send_token));
+      let success = await vite.send(address, payout, send_vite, send_token);
       if (!success) {
         errors = 'Send failed';
       } else {

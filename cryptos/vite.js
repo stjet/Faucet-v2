@@ -39,6 +39,8 @@ let receive = new vite.accountBlock.ReceiveAccountBlockTask({
   provider: provider
 });
 
+receive.start();
+
 async function check_bal(address) {
   //ledger_getAccountInfoByAddress
   let resp = await provider.request('ledger_getAccountInfoByAddress', address);
@@ -78,9 +80,8 @@ async function dry() {
       dry_info.token = true;
     }
   }
-  return dry_info
+  return dry_info;
 }
-
 
 async function get_account_history(address) {
   let resp = await provider.request('ledger_getAccountBlocks', [address, null, null, 1500]);
@@ -128,7 +129,7 @@ async function send(address, amount, send_vite=true, send_token=true) {
     }
   }
   //send token
-  if (send_token) {
+  if (send_token && config.vite.token) {
     let token_send = vite.accountBlock.createAccountBlock('send', {
       "address": faucet_address,
       "toAddress": address,
