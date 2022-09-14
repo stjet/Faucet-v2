@@ -6,7 +6,11 @@ const rpc_url = config.nano.rpc
 nanojs.setBananodeApiUrl(rpc_url);
 
 if (config.nano.auth) {
-  nanojs.setAuth(config.nano.auth)
+  if (config.secrets.use_env) {
+    nanojs.setAuth(process.env.nano_apikey);
+  } else {
+    nanojs.setAuth(config.nano.auth);
+  }
 }
 
 let seed;

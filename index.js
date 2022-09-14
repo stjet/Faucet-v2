@@ -25,6 +25,9 @@ app.use(cookieParser());
 const captcha_use = config.captcha.use;
 const faucet_name = config.name;
 
+//even if prussia captcha is being used, this is passed to nunjucks, and that is fine.
+const hcaptcha_sitekey = config.captcha.sitekey;
+
 let default_found = false;
 
 let banano;
@@ -55,6 +58,7 @@ if (config.enabled_coins.includes('banano')) {
         claim_time_str: claim_time_str,
         faucet_name: faucet_name.replace("<coin>", "Banano"),
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         given: false,
         amount: false,
         faucet_address: faucet_address,
@@ -140,6 +144,7 @@ if (config.enabled_coins.includes('banano')) {
         claim_time_str: claim_time_str,
         faucet_name: faucet_name.replace("<coin>", "Banano"),
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         given: given,
         amount: amount,
         faucet_address: faucet_address,
@@ -187,6 +192,7 @@ if (config.enabled_coins.includes('nano')) {
         claim_time_str: claim_time_str,
         faucet_name: faucet_name.replace("<coin>", "Nano"),
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         given: false,
         faucet_address: faucet_address,
         current_bal: current_bal,
@@ -263,6 +269,7 @@ if (config.enabled_coins.includes('nano')) {
         claim_time_str: claim_time_str,
         faucet_name: faucet_name.replace("<coin>", "Nano"),
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         given: given,
         amount: amount,
         faucet_address: faucet_address,
@@ -312,6 +319,7 @@ if (config.enabled_coins.includes('xdai')) {
         faucet_address: faucet_address,
         errors: false,
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         given: false,
         challenge_url: challenge_url,
         challenge_code: challenge_code,
@@ -385,6 +393,7 @@ if (config.enabled_coins.includes('xdai')) {
         address: address,
         errors: errors,
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         given: given,
         amount: amount,
         challenge_url: challenge_url,
@@ -430,6 +439,7 @@ if (config.enabled_coins.includes('vite')) {
         errors: false,
         given: false,
         captcha: captcha_use,
+        sitekey: hcaptcha_sitekey,
         challenge_url: challenge_url,
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
@@ -511,6 +521,7 @@ if (config.enabled_coins.includes('vite')) {
           errors: errors,
           given: given,
           captcha: captcha_use,
+          sitekey: hcaptcha_sitekey,
           challenge_url: challenge_url,
           challenge_code: challenge_code,
           challenge_nonce: challenge_nonce,
@@ -527,6 +538,7 @@ if (config.enabled_coins.includes('vite')) {
           errors: errors,
           given: given,
           captcha: captcha_use,
+          sitekey: hcaptcha_sitekey,
           challenge_url: challenge_url,
           challenge_code: challenge_code,
           challenge_nonce: challenge_nonce,
