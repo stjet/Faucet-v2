@@ -38,7 +38,11 @@ async function hcaptcha(req_body) {
   params.append('secret', captcha_secret);
   let resp = await fetch('https://hcaptcha.com/siteverify', {method: 'POST', body: params});
   resp = await resp.json();
-  return resp.data['success'];
+  //catches undefined also
+  if (!resp['success']) {
+    return false;
+  }
+  return resp['success'];
 }
 
 /*

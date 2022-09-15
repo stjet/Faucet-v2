@@ -59,7 +59,8 @@
     "token": {
       "id": "",
       "amount": 1,
-      "decimals": 0
+      "decimals": 0,
+      "alias": "token name"
     },
     "optional": true
   },

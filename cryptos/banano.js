@@ -17,8 +17,8 @@ let blacklisted_addresses = config.blacklist.banano;
 //amount is in whole banano, not raw. Eg: amount=4.2 sends 4.2 banano
 async function send(address, amount) {
   try {
-    await bananojs.sendBananoWithdrawalFromSeed(seed, 0, address, amount);
-    return true;
+    let tx = await bananojs.sendBananoWithdrawalFromSeed(seed, 0, address, amount);
+    return tx;
   } catch (e) {
     return false;
   }

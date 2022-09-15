@@ -79,6 +79,7 @@ if (config.enabled_coins.includes('banano')) {
     let errors = false;
     let amount = false;
     let given = false;
+    let tx;
     let current_bal = await banano.check_bal(faucet_address);
     let ip = req.header('x-forwarded-for');
     if (ip_cache[ip] > 4) {
@@ -121,6 +122,7 @@ if (config.enabled_coins.includes('banano')) {
     }
     if (!errors) {
       let success = await banano.send(address, payout);
+      tx = success;
       if (!success) {
         errors = 'Send failed';
       } else {
@@ -155,7 +157,8 @@ if (config.enabled_coins.includes('banano')) {
         challenge_nonce: challenge_nonce,
         extra: extra,
         extensions: extensions,
-        is_default: config.banano.default
+        is_default: config.banano.default,
+        tx: tx
       })
     );
   }
@@ -545,7 +548,7 @@ if (config.enabled_coins.includes('vite')) {
           amount: amount,
           address: address,
           faucet_address: faucet_address,
-          token: config.vite.token.id,
+          token: config.vite.token.alias,
           amount_token: config.vite.token.amount,
           is_default: config.vite.default
         })
