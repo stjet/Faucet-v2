@@ -38,7 +38,6 @@ if (config.enabled_coins.includes('banano')) {
   let ip_cache = {};
   banano = require('./cryptos/banano.js');
   let extra = {};
-  let extensions = {};
   //turn this into claim time string
   let claim_time_str = util.milliseconds_to_readable(config.banano.claim_frequency);
   let faucet_address = config.banano.address;
@@ -68,7 +67,6 @@ if (config.enabled_coins.includes('banano')) {
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
         extra: extra,
-        extensions: extensions,
         is_default: config.banano.default
       })
     );
@@ -156,7 +154,6 @@ if (config.enabled_coins.includes('banano')) {
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
         extra: extra,
-        extensions: extensions,
         is_default: config.banano.default,
         tx: tx
       })
@@ -176,7 +173,6 @@ if (config.enabled_coins.includes('nano')) {
   let ip_cache = {};
   nano = require('./cryptos/nano.js');
   let extra = {};
-  let extensions = {};
   //turn this into claim time string
   let claim_time_str = util.milliseconds_to_readable(config.nano.claim_frequency);
   let faucet_address = config.nano.address;
@@ -203,7 +199,6 @@ if (config.enabled_coins.includes('nano')) {
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
         extra: extra,
-        extensions: extensions,
         is_default: config.nano.default
       })
     );
@@ -283,7 +278,6 @@ if (config.enabled_coins.includes('nano')) {
         challenge_code: challenge_code,
         challenge_nonce: challenge_nonce,
         extra: extra,
-        extensions: extensions,
         is_default: config.nano.default
       })
     );
@@ -302,7 +296,6 @@ if (config.enabled_coins.includes('xdai')) {
   let ip_cache = {};
   xdai = require('./cryptos/xdai.js');
   let extra = {};
-  let extensions = {};
   //turn this into claim time string
   let claim_time_str = util.milliseconds_to_readable(config.xdai.claim_frequency);
   let faucet_address = config.xdai.address;
@@ -423,7 +416,6 @@ if (config.enabled_coins.includes('vite')) {
     transctionNumber: 10,
   });
   let extra = {};
-  let extensions = {};
   //turn this into claim time string
   let claim_time_str = util.milliseconds_to_readable(config.vite.claim_frequency);
   let faucet_address = config.vite.address;

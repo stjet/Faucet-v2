@@ -38,7 +38,7 @@ async function get_account_history(address) {
 async function check_bal(address) {
   let raw_bal = await nanojs.getAccountBalanceRaw(address);
   let bal_parts = await nanojs.getNanoPartsFromRaw(raw_bal);
-  return bal_parts.nano+(bal_parts.nanoshi/100)
+  return Number(bal_parts.nano)+Number(bal_parts.nanoshi)/1000000;
 }
 
 async function dry() {

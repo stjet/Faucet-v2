@@ -33,7 +33,7 @@ async function get_account_history(address) {
 async function check_bal(address) {
   let raw_bal = await bananojs.getAccountBalanceRaw(address);
   let bal_parts = await bananojs.getBananoPartsFromRaw(raw_bal);
-  return bal_parts.banano+(bal_parts.banoshi/100)
+  return Number(bal_parts.banano)+Number(bal_parts.banoshi)/100;
 }
 
 async function dry() {

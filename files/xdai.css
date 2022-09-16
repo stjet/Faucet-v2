@@ -28,3 +28,7 @@ html {
 #challenge-img {
   width: 100%;
 }
+
+#info {
+  word-wrap: break-word;
+}

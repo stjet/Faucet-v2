@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8">
     <meta property="og:title" content="xDai Faucet">
-    <meta property="og:description" content="Earn Free xDai!">
+    <meta property="og:description" content="Earn Free xDai on the Gnosis chain!">
     <meta property="og:image" content="(xdai image here)">
     <meta name="viewport" content="width=device-width">
     <title>{{ faucet_name }}</title>
@@ -15,7 +15,7 @@
     <center>
     <div id="center">
       <h1 id="title">xDai Faucet</h2>
-      <p>Need gas? We gotcha covered. Please donate to {{ faucet_address }}.</p>
+      <p id="info">Need gas? We gotcha covered. Please donate to {{ faucet_address }}.</p>
       {% if errors %}
         <p>{{ errors }}</p>
       {% endif %}
@@ -25,7 +25,7 @@
       <form method="POST" {% if is_default %}
           action="/"
         {% else %}
-          action="/banano"
+          action="/xdai"
         {% endif %}
       id="faucet-form">
         <label for="address">xDai Address:</label><input id="address" type="text" name="address">
