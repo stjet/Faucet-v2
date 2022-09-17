@@ -24,9 +24,14 @@ async function send(address, amount) {
   }
 }
 
-async function get_account_history(address) {
-  let account_history = await bananojs.getAccountHistory(address, -1);
-  return account_history.history;
+async function get_account_history(address, amount=-1) {
+  try {
+    let account_history = await bananojs.getAccountHistory(address, amount);
+    return account_history.history;
+  } catch (e) {
+    console.log("address error: "+address);
+    return false;
+  }
 }
 
 //precision to 2 digits, round down (floor)
@@ -74,8 +79,8 @@ async function receive_deposits() {
   await bananojs.receiveBananoDepositsForSeed(seed, 0, rep);
 }
 
-async function is_valid(address) {
-  return await bananojs.getBananoAccountValidationInfo(address).valid;
+function is_valid(address) {
+  return bananojs.getBananoAccountValidationInfo(address).valid;
 }
 
 //Following functions are related to get_score function. return score where higher number means high suspicion. this is only to strain out suspicious addresses from a mass of addresses. a high number does not mean an address is definitely a bot/cheating account and vice versa.
@@ -117,6 +122,9 @@ async function is_funneling(account_history) {
 async function get_score(address) {
   let score = 0;
   let account_history = await get_account_history(address, 500);
+  if (!account_history) {
+    return 0;
+  }
   let unopened = await is_unopened(address);
   if (await is_unopened(address)) {
     score += 4;

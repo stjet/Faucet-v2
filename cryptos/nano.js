@@ -30,8 +30,14 @@ async function send(address, amount) {
   }
 }
 
-async function get_account_history(address) {
-  return await nanojs.getAccountHistory(address, -1);
+async function get_account_history(address, amount=-1) {
+  try {
+    let account_history = await nanojs.getAccountHistory(address, amount);
+    return account_history.history;
+  } catch (e) {
+    console.log("address error: "+address);
+    return false;
+  }
 }
 
 //precision to 2 digits, round down (floor)
@@ -79,8 +85,8 @@ async function receive_deposits() {
   await nanojs.receiveNanoDepositsForSeed(process.env.seed, 0, rep);
 }
 
-async function is_valid(address) {
-  return await nanojs.getNanoAccountValidationInfo(address).valid;
+function is_valid(address) {
+  return nanojs.getNanoAccountValidationInfo(address).valid;
 }
 
 module.exports = {

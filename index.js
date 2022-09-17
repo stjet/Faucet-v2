@@ -73,8 +73,14 @@ if (config.enabled_coins.includes('banano')) {
   }
   async function banano_post_handler(req, res) {
     //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
-    let address = req.body.address;
     let errors = false;
+    let address = req.body.address;
+    if (!address) {
+      errors = "Invalid address";
+    } else {
+      //remove spaces
+      address = address.trim();
+    }
     let amount = false;
     let given = false;
     let tx;
@@ -94,7 +100,6 @@ if (config.enabled_coins.includes('banano')) {
     let success = await captcha.get_captcha_success(req.body);
     if (!success) {
       errors = 'Failed or expired captcha';
-      //return
     }
     let too_soon_db = await util.claim_too_soon_db(address, 'banano');
     //check db
@@ -117,6 +122,9 @@ if (config.enabled_coins.includes('banano')) {
       payout = config.banano.payouts.min_payout * 0.5;
     } else if (score > 5) {
       payout = config.banano.payouts.min_payout * 0.5;
+    }
+    if (!banano.is_valid(address)) {
+      errors = "Invalid Banano address";
     }
     if (!errors) {
       let success = await banano.send(address, payout);
@@ -204,8 +212,14 @@ if (config.enabled_coins.includes('nano')) {
     );
   }
   async function nano_post_handler(req, res) {
-    let address = req.body.address;
     let errors = false;
+    let address = req.body.address;
+    if (!address) {
+      errors = "Invalid address";
+    } else {
+      //remove spaces
+      address = address.trim();
+    }
     let amount = false;
     let given = false;
     let current_bal = await nano.check_bal(faucet_address);
@@ -241,6 +255,9 @@ if (config.enabled_coins.includes('nano')) {
     //reduce payouts for suspicious accounts
     if (config.unopened_reduced_payouts && (await nano.is_unopened(address))) {
       payout = config.nano.payouts.min_payout * 0.5;
+    }
+    if (!nano.is_valid(address)) {
+      errors = "Invalid Nano address";
     }
     if (!errors) {
       let success = await nano.send(address, payout);
@@ -292,7 +309,6 @@ if (config.enabled_coins.includes('nano')) {
   }
 }
 if (config.enabled_coins.includes('xdai')) {
-  //
   let ip_cache = {};
   xdai = require('./cryptos/xdai.js');
   let extra = {};
