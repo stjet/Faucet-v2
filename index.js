@@ -482,7 +482,6 @@ if (config.enabled_coins.includes('vite')) {
     let success = await captcha.get_captcha_success(req.body);
     if (!success) {
       errors = 'Failed or expired captcha';
-      //return
     }
     let too_soon_db = await util.claim_too_soon_db(address, 'vite');
     //check db
