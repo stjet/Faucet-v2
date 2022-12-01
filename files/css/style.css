@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+body {
+  background-color: #141416;
+  text-shadow: 0 0.05rem 0.1rem rgba(0, 0, 0, 0.5);
+}
+
+.cover-container {
+  max-width: 42em;
+}
+
+.bi {
+  vertical-align: -0.125em;
+  fill: currentColor;
+}

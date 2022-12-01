@@ -1,83 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta property="og:title" content="Vite Faucet">
-    <meta property="og:description" content="Free vite and vite token faucet">
-    <meta property="og:image" content="(vite image here)">
-    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Earn Free Vite!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ faucet_name }}" />
+    <meta property="og:description" content="Earn Free Vite!" />
+    <meta property="og:image" content="img/vite-logo.png" />
     <title>{{ faucet_name }}</title>
-    {% if captcha == 'hcaptcha' %}
-      <script src="https://hcaptcha.com/1/api.js" async defer></script>
-    {% endif %}
-    <link href="vite.css" rel="stylesheet" type="text/css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;600&family=Source+Sans+Pro:wght@300&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/vite.css" />
+    <link rel="icon" type="image/x-icon" href="img/vite-favicon.ico" />
   </head>
-  <body>
-    <div id="main">
-      <div id="container">
-        <h1>Vite + Token Faucet</h1>
-        <center>
-          <img src="/vite_in.gif" id="gif"></img>
-          <br>
-          {% if errors %}
-            <p>{{ errors }}</p>
-          {% endif %}
-          {% if given %}
-            {% if token %}
-              <b>Success! {{ amount }} VITE and {{ amount_token }} {{ token }} has been sent to {{ address }}. Please donate to {{ faucet_address }} to keep the faucet running!</b>
-            {% else %}
-              <b>Success! {{ amount }} VITE has been sent to {{ address }}. Please donate to {{ faucet_address }} to keep the faucet running!</b>
-            {% endif %}
-          {% else %}
-            <button id="claim-button">CLAIM</button>
-          {% endif %}
-        </center>
-        <div>
-          <h2>What is Vite?</h2>
-          <p>Vite is a fast, feeless cryptocurrency that supports Smart Contracts. Learn more at the <a href="https://www.vite.org/">Vite website</a>.</p>
-          <h2>What are Vite Tokens?</h2>
-          <p>Vite tokens are tokens on the vite blockchain. They enjoy the benefit of smart contracts and the lack of fees, unlike other blockchains like Ethereum with long block times and high fees. One example is Vitamin Coin.</p>
-          <h2>About Faucet</h2>
-          <p>Made by <a href="https://prussia.dev">Prussia</a> + KaffinPX and proudly open source.</p>
-          <h2>DAG Tech</h2>
-          <p>DAG stands for Directed Acyclic Graph, and is a way of organizing transactions that differs from the conventional blockchain. DAGs enable Vite to quickly and feelessly confirm transactions.</p>
+  <body class="d-flex flex-column min-vh-100">
+    {% include "includes/svg.html" %}
+    <main>
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="row">
+              <div class="col-12 my-5">
+                <h1 class="logo text-center mt-3 mb-0">{{ faucet_name }}</h1>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 mb-2">
+                {% if given %}
+                <div class="alert alert-success display" role="alert">
+                  <p class="mb-2">Success! You have been sent {{ amount }} VITE to: <span class="text-wrap text-address">{{ given_to }}</span>.</p>
+                  <div class="row">
+                    <div class="col-12 mb-2">
+                      <img class="coin" src="img/vite-icon.png" />
+                    </div>
+                    <div class="col-12 d-flex justify-content-between">
+                      <svg class="bi" width="32" height="32"><use xlink:href="#wallet-fill" /></svg>
+                      <svg class="bi" width="32" height="32"><use xlink:href="#wallet-fill" /></svg>
+                    </div>
+                  </div>
+                </div>
+                {% else %}
+                {% if notice %}
+                <div class="alert alert-info alert-dismissible shadow display" role="alert">
+                  <h5 class="lead">{{ notice.title }}</h5>
+                  <p class="mb-0">{{ notice.content }}</p>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  {% if notice.link %}
+                  <a class="btn btn-primary mt-3" type="text/html" href="{{ notice.link }}" target="_blank" rel="noopener noreferrer">Take me there!</a>
+                  {% endif %}
+                </div>
+                {% endif %}
+                <form method="POST" action="{% if default_faucet === 'vite' %}/{% else %}/vite{% endif %}" id="form">
+                  <div class="row gx-2">
+                    <div class="col-md-8 mb-2 order-1">
+                      <input type="text" class="form-control form-control-lg" name="address" id="address" placeholder="vite_..." />
+                    </div>
+                    <div class="col-md-12 order-2 order-md-3">
+                      <div id="clientErrors"></div>
+                    </div>
+                    <div class="col-md-4 mb-2 d-grid order-3 order-md-2">
+                      <button type="submit" id="buttonElement" class="btn btn-primary btn-lg px-4">Get Vite!</button>
+                    </div>
+                    <div id="hcaptcha" class="h-captcha" data-sitekey="{{ sitekey }}" data-theme="dark" data-size="invisible" data-callback="captchaSubmit" data-chalexpired-callback="captchaExpired" data-open-callback="captchaOpen" data-close-callback="captchaClose" data-error-callback="captchaError">
+                      <input type="hidden" name="g-recaptcha-response" value="" />
+                    </div>
+                  </div>
+                </form>
+                {% endif %}
+                <div class="row mt-4">
+                  <div class="col-md-8 mr-auto">
+                    <h5>What is Vite?</h5>
+                    <p>Vite is a fast, feeless cryptocurrency that supports smart contracts. <a href="https://www.vite.org/" target="_blank" rel="noopener noreferrer">Learn more</a>.</p>
+                    <h5>What are Vite Tokens?</h5>
+                    <p>Vite tokens are tokens on the Vite blockchain. They enjoy the benefit of smart contracts and the lack of fees. One example is Vitamin Coin. Other blockchains like Ethereum can have long block times and high fees.</p>
+                    <h5>DAG Technology</h5>
+                    <p>DAG stands for Directed Acyclic Graph, and is a way of organizing transactions that differs from the conventional blockchain. DAGs enable Vite to confirm transactions quickly and feelessly.</p>
+                  </div>
+                  <div class="col-md-4 ml-auto">
+                    <h5>Donations</h5>
+                    <p>You can contribute to the faucet donating to the following address:</p>
+                    <div class="text-center">
+                      <div class="qr-code my-3" id="qrCode"></div>
+                      <a class="text-wrap text-address small" id="copyViteAddress" href="#" type="text/html" onClick="copyToClipboard('copyViteAddress')">{{ faucet_address }}</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div id="claim-modal-container" style="display: none;">
-      <div id="claim-modal">
-        <button id="close-modal">Close</button>
-        <form method="POST" {% if is_default %}
-            action="/"
-          {% else %}
-            action="/vite"
-          {% endif %}
-        id="faucet-form">
-          <label for="address">Vite Address:</label><input id="address" type="text" name="address">
-          <br>
-          {% if captcha == 'hcaptcha' %}
-            <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
-          {% elif captcha == 'prussia_captcha' %}
-            <div id="challenge">
-              <img src="{{ challenge_url }}" title="A text captcha" id="challenge-img"/>
-              <input type="text" name="answer" id="challenge-answer" placeholder="Captcha answer..."/>
-              <input type="hidden" name="code" value="{{ challenge_code }}"/>
-              <input type="hidden" name="nonce" value="{{ challenge_nonce }}"/>
-              <br>
-            </div>
-          {% endif %}
-          <br>
-          <input type="submit" value="submit"/>
-        </form>
+    </main>
+    <footer class="footer py-3 mt-auto">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10 text-center">
+            <hr />
+            <p class="mb-2"><a href="https://prussia.dev" target="_blank" rel="noopener noreferrer">Prussia</a> | <span class="a">KaffinPX</span> | <a href="https://halfbakedbread.github.io" target="_blank" rel="noopener noreferrer">HalfBakedBread</a></p>
+            <p class="small mb-0">This site is protected by hCaptcha and its <a href="https://hcaptcha.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://hcaptcha.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </footer>
     <script>
-      document.getElementById('claim-button').onclick = function() {
-        document.getElementById('claim-modal-container').style.display = 'block';
-      }
-      document.getElementById('close-modal').onclick = function() {
-        document.getElementById('claim-modal-container').style.display = 'none';
-      }
+      const serverGiven = '{{ given }}' === 'true';
+      const serverErrors = '{{ errors }}';
+      const serverIdentifier = '{{ coin }}';
+      const claimingAddress = '{{ given_to }}';
+      const qrAddress = '{{ faucet_address }}';
     </script>
+    <script src="https://hcaptcha.com/1/api.js" defer></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <script src="js/bundle.js"></script>
   </body>
 </html>

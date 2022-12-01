@@ -1,19 +1,24 @@
 # Secrets
-There are currently two supported ways to store secrets. In the config file (**strongly not recommended**) or the `.env` file.
+This is likely the most important configuration file of them all, as seeds and private keys hold and keep our assets safe. It is recommended to generate a new one, do not use your personal seed or private key.
 
-## .env file
-Look at `.env.example` for an example.
+## About the `.env` file
+The `.env` file contains the individual user environment variables that allow faucet to connect to the database and send payments securely.
 
-## config
-In the `config.json` file, add a key `secrets` that has an object/dictionary full of the values.
+## `.env` file values
+*Note: It is not necessary that you declare seeds/private keys for the faucets you don't have enabled in `config.json`*
+- `bn_seed`: Mandatory for Banano and/or Nano faucets. In hex format. Consider generating a vanity address seed
+- `eth_privkey`: Mandatory for xDai faucets. Starts with 0x
+- `vite_privkey`: Mandatory for Vite faucets. Private key
+- `captcha_secret`: Mandatory for hCaptcha. Not to be confused with the site key. It can be found on your hCaptcha [settings page](https://dashboard.hcaptcha.com/settings)
+- `mongo_connection_string`: MongoDB URL to connect to MongoDB database. Should start with "mongo+srv://". This is the whole url, database user and password, including the url query strings (the text after `?`)
 
-## Values
-**bn_seed**: Mandatory for banano and/or nano faucets. This is the seed used to access faucet account funds (to send payouts). In hex format. Recommended to generate a new one, do not use your personal one. Consider generating a vanity address seed.
+## Production ready `.env` reference file
+Please do not copy the variables used below, instead use them as reference to create your own file.
 
-**eth_privkey**: Mandatory for xDai faucets. This is the private key used to access faucet accont funds (to send payouts). Starts with 0x. Recommended to generate a new one, do not use your personal one.
-
-**captcha_secret**: Mandatory when using hCaptcha. Not to be confused with the site key. It can be found on your hCaptcha [profile page](https://dashboard.hcaptcha.com/settings).
-
-**mongo_connection_string**: Mongo url to connect to mongodb database. Should start with "mongo+srv://". This is the whole url, including the url query strings (the stuff after `?`), and db user password.
-
-**vite_privkey**: Mandatory for vite faucets. Private key. Recommended to generate a new one, do not use your personal one.
+```
+bn_seed=0957...0000
+eth_privkey=15fd...0000
+vite_privkey=f522...0000
+captcha_secret=0x73...0000
+mongo_connection_string=mongodb+srv://...rity
+```

@@ -1,108 +1,93 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <!-- Ape Lincoln for President -->
-    <meta charset="utf-8">
-    <meta property="og:title" content="Nano Faucet">
-    <meta property="og:description" content="Earn Free Nano!">
-    <meta property="og:image" content="(nano image here)">
-    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Earn Free Nano!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ faucet_name }}" />
+    <meta property="og:description" content="Earn Free Nano!" />
+    <meta property="og:image" content="img/nano-logo.png" />
     <title>{{ faucet_name }}</title>
-    {% if captcha == 'hcaptcha' %}
-      <script src="https://hcaptcha.com/1/api.js" async defer></script>
-    {% endif %}
-    <link href="/nano.css" rel="stylesheet" type="text/css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400&family=Inter:wght@300&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/nano.css" />
+    <link rel="icon" type="image/x-icon" href="img/nano-favicon.ico" />
   </head>
-  <body>
-    <center>
-      <h1 id="title">Nano Faucet</h2>
-      {% if errors %}
-        <p>{{ errors }}</p>
-      {% endif %}
-      {% if given %}
-        <p>Success, {{ amount }} sent to {{ address }}</p>
-      {% endif %}
-      <form method="POST" {% if is_default %}
-          action="/"
-        {% else %}
-          action="/nano"
-        {% endif %}
-      id="faucet-form">
-        <label for="address">Nano Address:</label><input id="address" type="text" name="address">
-        {% if captcha == 'hcaptcha' %}
-          <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
-        {% elif captcha == 'prussia_captcha' %}
-          <!--Prussia captcha html stuff-->
-          <div id="challenge">
-            <img src="{{ challenge_url }}" title="A text captcha" id="challenge-img"/>
-            <input type="text" name="answer" id="challenge-answer" placeholder="Captcha answer..."/>
-            <input type="hidden" name="code" value="{{ challenge_code }}"/>
-            <input type="hidden" name="nonce" value="{{ challenge_nonce }}"/>
-            <br>
+  <body class="d-flex flex-column min-vh-100">
+    <main>
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-6 mt-5">
+            <div class="row">
+              <div class="col-12 mt-5 mb-4">
+                <h1 class="fw-light text-center">{{ faucet_name }}</h1>
+              </div>
+              <div class="col-12 my-2">
+                {% if given %}
+                <div class="alert alert-success display" role="alert">
+                  <p class="lead"><b>Success!</b></p>
+                  <p class="mb-0">{{ amount }} XNO has been sent to: <span class="text-wrap text-address">{{ given_to }}</span>. <a class="link-light" href="https://www.nanolooker.com/block/{{ tx }}" taget="_blank" rel="noopener noreferrer">View on explorer</a>.</p>
+                </div>
+                {% else %}
+                {% if notice %}
+                <div class="alert alert-success alert-dismissible shadow display mb-4" role="alert">
+                  <h5 class="lead">{{ notice.title }}</h5>
+                  <p class="mb-0">{{ notice.content }}</p>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                  {% if notice.link %}
+                  <a class="btn btn-primary mt-3" type="text/html" href="{{ notice.link }}" target="_blank" rel="noopener noreferrer">Take me there!</a>
+                  {% endif %}
+                </div>
+                {% endif %}
+                <form method="POST" action="{% if default_faucet === 'nano' %}/{% else %}/nano{% endif %}" id="form">
+                  <div class="row g-0">
+                    <div class="col-8 mb-2">
+                      <input type="text" class="form-control form-control-lg border-light rounded-end-0" name="address" id="address" placeholder="nano_..." />
+                    </div>
+                    <div class="col-4 mb-2 d-grid">
+                      <button type="submit" id="buttonElement" class="btn btn-primary btn-lg rounded-start-0 px-4">Drop!</button>
+                    </div>
+                    <div id="hcaptcha" class="h-captcha" data-sitekey="{{ sitekey }}" data-theme="dark" data-size="invisible" data-callback="captchaSubmit" data-chalexpired-callback="captchaExpired" data-open-callback="captchaOpen" data-close-callback="captchaClose" data-error-callback="captchaError">
+                      <input type="hidden" name="g-recaptcha-response" value="" />
+                    </div>
+                  </div>
+                </form>
+                <div id="clientErrors"></div>
+                {% endif %}
+                <div class="mt-4">
+                  <h5>What is Nano?</h5>
+                  <p>Nano is a fast and feeless cryptocurrency based on DAG technology.</p>
+                  <h5 class="mt-4">Where can I get an address?</h5>
+                  <p>You can set up a wallet and get a address <a class="text-decoration-none" href="https://nault.cc/" target="_blank" rel="noopener noreferrer">here</a>.</p>
+                  <h5 class="mt-4">Still lost?</h5>
+                  <p>You can learn more <a class="text-decoration-none" href="https://nano.org/" target="_blank" rel="noopener noreferrer">here</a>. Also make sure to check out the <a class="text-decoration-none" href="https://reddit.com/r/nanocurrency" target="_blank" rel="noopener noreferrer">Reddit</a>, <a class="text-decoration-none" href="https://t.me/nanocurrency/" target="_blank" rel="noopener noreferrer">Telegram</a> and <a class="text-decoration-none" href="https://chat.nano.org/" target="_blank" rel="noopener noreferrer">Discord</a> communities.</p>
+                </div>
+              </div>
+            </div>
           </div>
-        {% endif %}
-        <button type="submit" id="get-btn">Get Free Nano</button>
-      </form>
-    </center>
-    <div class="expandables">
-      <div id="about-nano-container" class="expandable">
-        <div class="always-show-expandable">
-            <h1 onclick="toggle_expandable('about-nano')" class="expandable-title">About Nano <span id="about-nano-plus-minus" class="plus-minus">+</span></h1>
-        </div>
-        <div id="about-nano" class="expand-on-click">
-          <p>Nano is a <a href="https://www.investopedia.com/terms/c/cryptocurrency.asp">cryptocurrency</a> that is feeless and fast (unlike others, such as bitcoin, which requires several minutes to send coins and can have high fees). You can set up a wallet and get an address <a href="https://nault.cc/">here</a>.</p>
-          <p>You can learn more <a href="https://docs.nano.org/what-is-nano/overview/">here</a>. Make sure to check out the <a href="https://reddit.com/r/nanocurrency">reddit</a>, <a href="https://t.me/nanocurrency">telegram</a> and <a href="https://chat.nano.org/">discord</a> communities.</p>
         </div>
       </div>
-    </div>
-    <div class="expandables">
-      <div id="about-faucet-container" class="expandable">
-        <div class="always-show-expandable">
-            <h1 onclick="toggle_expandable('about-faucet')" class="expandable-title">About Faucet <span id="about-faucet-plus-minus" class="plus-minus">+</span></h1>
-        </div>
-        <div id="about-faucet" class="expand-on-click">
-          <p>This faucet pays out some Nano every {{ claim_time_str }}. We rely on community donations so please, please, donate some nano to the faucet (address: {{ faucet_address }}). Come back every {{ claim_time_str }}</p>
-          <p><b>Current Faucet Balance: {{ current_bal }}</b></p>
+    </main>
+    <footer class="footer mt-auto py-3">
+      <div class="container">
+        <div class="footer-text text-center opacity-75">
+          <p class="mb-2"><a class="text-decoration-none" href="https://prussia.dev" target="_blank" rel="noopener noreferrer">Prussia</a> | <a class="text-decoration-none" href="https://halfbakedbread.github.io" target="_blank" rel="noopener noreferrer">HalfBakedBread</a></p>
+          <p class="small">This site is protected by hCaptcha and its <a class="text-decoration-none" href="https://hcaptcha.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a class="text-decoration-none" href="https://hcaptcha.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.</p>
         </div>
       </div>
-    </div>
-    <div class="expandables">
-      <div id="about-banano-container" class="expandable">
-        <div class="always-show-expandable">
-            <h1 onclick="toggle_expandable('about-banano')" class="expandable-title">About Banano <span id="about-banano-plus-minus" class="plus-minus">+</span></h1>
-        </div>
-        <div id="about-banano" class="expand-on-click">
-          <p>Banano is a fork coin (has the same base code) as Nano, with the same feeless and fast technology but more emphasis of fun, teaching beginners, and community.</p>
-          <p>Learn more <a href="https://banano.cc/">here</a></p>
-        </div>
-      </div>
-    </div>
-    <div class="expandables">
-      <div id="support-creator-container" class="expandable">
-        <div class="always-show-expandable">
-            <h1 onclick="toggle_expandable('support-creator')" class="expandable-title">Support Creator <span id="support-creator-plus-minus" class="plus-minus">+</span></h1>
-        </div>
-        <div id="support-creator" class="expand-on-click">
-          <p>It took a lot of work to make and maintain the faucet, so please support my work by donating to me.</p>
-          <ul>
-            <li>Nano: nano_1o7ija3mdbmpzt8qfnck583tn99fiupgbyzxtbk5h4g6j57a7rawge6yzxqp</li>
-            <li>Ethereum: 0x100e6F9164ADf9C924EDc31bc89Ab8bc1E5db2dd</li>
-            <li>Bitcoin Cash: bitcoincash:qz6q9hqe9r2emrz83m8tg8j2mgqup2hztgvsgzk40k</li>
-            <li>Banano: ban_1o7ija3mdbmpzt8qfnck583tn99fiupgbyzxtbk5h4g6j57a7rawge6yzxqp</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
+    </footer>
     <script>
-      function toggle_expandable(id) {
-        if (document.getElementById(id+"-plus-minus").innerText == "+") {
-          document.getElementById(id+"-plus-minus").innerText = "-";
-          document.getElementById(id).style.display = "block";
-        } else {
-          document.getElementById(id+"-plus-minus").innerText = "+";
-          document.getElementById(id).style.display = "none";
-        }
-      }
+      const serverGiven = '{{ given }}' === 'true';
+      const serverErrors = '{{ errors }}';
+      const serverIdentifier = '{{ coin }}';
+      const claimingAddress = '{{ given_to }}';
     </script>
+    <script src="https://hcaptcha.com/1/api.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@bananocoin/bananojs@2.7.10/dist/bananocoin-bananojs.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <script src="js/bundle.js"></script>
   </body>
 </html>

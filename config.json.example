@@ -3,14 +3,23 @@
   "name": "Prussia's <coin> Faucet",
   "db": "mongodb",
   "port": 8080,
+  "owner": "YOUR NAME",
+  "logo": false,
   "unopened_reduced_payouts": false,
+  "notice": {
+    "title": "More front-end potassium",
+    "content": "All the faucets have a new look, go check them out!",
+    "link": "https://banano.cc"
+  },
+  "sponsor": {
+    "name": "Prussia",
+    "link": "https://prussia.dev"
+  },
   "captcha": {
-    "use": "prussia_captcha",
+    "hcaptcha_sitekey": "YOUR HCAPTCHA SITEKEY",
+    "use_splash": true,
     "prussia_captcha": "https://captcha.prussia.dev"
   },
-  "favicon": false,
-  "logo": true,
-  "owner": "Prussia",
   "banano": {
     "claim_frequency": 86400000,
     "enabled": true,
@@ -60,12 +69,10 @@
       "id": "",
       "amount": 1,
       "decimals": 0,
-      "alias": "token name"
+      "alias": "Token name"
     },
     "optional": true
   },
-  "api": true,
-  "debug": true,
   "secrets": {
     "use_env": true
   }

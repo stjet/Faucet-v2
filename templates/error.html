@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Earn Free Cryptocurrency!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ faucet_name }}" />
+    <meta property="og:description" content="Earn Free Cryptocurrency!" />
+    <title>{{ faucet_name }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="d-flex h-100 text-center text-light">
+    <div class="cover-container d-flex flex-column w-100 h-100 p-3 mx-auto">
+      <header class="mt-5 mb-auto">
+        <div>
+          <h1 class="float-center mb-4">{{ faucet_name }}</h1>
+        </div>
+      </header>
+      <main class="px-4">
+        <p class="lead mb-4">{{ error.status }}</p>
+        <p>{{ error.message }}</p>
+      </main>
+      <footer class="pt-4 mt-auto">
+        <p class="text-muted"><a href="https://prussia.dev" class="link-secondary" target="_blank" rel="noopener noreferrer">Prussia</a> | <a href="https://halfbakedbread.github.io" class="link-secondary" target="_blank" rel="noopener noreferrer">Half Baked Bread</a></p>
+      </footer>
+    </div>
+  </body>
+</html>

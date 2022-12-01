@@ -1,100 +1,136 @@
-<html>
-  <!--This should let jinja extensions come in. For example, my prussia faucet wants special decorations during holidays, so a jinja file should be able to be imported in here-->
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <!-- Ape Lincoln for President -->
-    <meta charset="utf-8">
-    <meta property="og:title" content="Banano Faucet">
-    <meta property="og:description" content="Earn Free Banano, and Never Let Your Memes be Dreams!">
-    <meta property="og:image" content="(banano image here)">
-    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Earn Free Banano, and Never Let Your Memes be Dreams!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ faucet_name }}" />
+    <meta property="og:description" content="Earn Free Banano, and Never Let Your Memes be Dreams!" />
+    <meta property="og:image" content="img/banano-logo.png" />
     <title>{{ faucet_name }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <link href="/banano.css" rel="stylesheet" type="text/css" />
-    <!--If using hcaptcha-->
-    {% if captcha == 'hcaptcha' %}
-      <script src="https://hcaptcha.com/1/api.js" async defer></script>
-    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/banano.css" />
+    <link rel="icon" type="image/x-icon" href="img/banano-favicon.ico" />
   </head>
-  <body>
-    <!--
-    <div class="notice">
-      <center>
-        <span class="closebtn" onclick="this.parentElement.parentElement.style.display='none';">&times;</span> Celebrating 100k Transactions! <b>Payout doubled, free NFTs</b> until 2/2!
-      </center>
-    </div>
-    -->
-    <header id="header">
-      <img src="/LOGO.png" alt="">
+  <body class="d-flex flex-column min-vh-100">
+    {% include "includes/svg.html" %}
+    <header class="logo-bg mb-auto">
+      <div class="container">
+        <div class="text-center">
+          <img src="img/{% if logo %}logo{% else %}banano-icon{% endif %}.png" class="logo img-fluid" alt="" />
+        </div>
+      </div>
     </header>
-      <main id=#main>
-      <br>
-      {% if given %}
-          <p>Come back in {{ claim_time_str }} to claim Banano again!</p>
-          <p>{{ amount }} Banano has been <a href="https://creeper.banano.cc/hash/{{ tx }}">sent</a> to address {{ address }}</p>
-          <p>Donations to {{ faucet_address }} keep the faucet running! Please donate. Payouts increase when faucet balance is high.</p>
-          <!--Hello faucet operators, please leave this in. It helps support faucet development and improvements to the faucet.-->
-          <p>Additionally, you can donate to the faucet development fund: ban_3pdripjhteyymwjnaspc5nd96gyxgcdxcskiwwwoqxttnrncrxi974riid94</p>
-        <b>Current Faucet Balance: {{ current_bal }}</b>
-      {% else %}
-        {% if errors %}
-          {{ errors }}
-        {% endif %}
-        <center>
-        </center>
-        <form method="POST" 
-          {% if is_default %}
-            action="/"
-          {% else %}
-            action="/banano"
-          {% endif %}
-        id="faucet-form">
-          <p>Hi! Please donate to the faucet: {{ faucet_address }}.</p>
-          <div class="address-input">
-            <label for="address" class="form-label">Banano Address:</label>
-            <input id="address" class="form-control" type="text" name="address" placeholder="ban_..." required>
-          </div>
-					<div id="extra"></div>
-          {% if captcha == 'hcaptcha' %}
-            <div class="h-captcha" data-sitekey="{{ sitekey }}"></div>
-          {% elif captcha == 'prussia_captcha' %}
-            <!--Prussia captcha html stuff-->
-            <div id="challenge">
-              <img src="{{ challenge_url }}" title="A text captcha" id="challenge-img"/>
-              <input type="text" name="answer" id="challenge-answer" placeholder="Captcha answer..."/>
-              <input type="hidden" name="code" value="{{ challenge_code }}"/>
-              <input type="hidden" name="nonce" value="{{ challenge_nonce }}"/>
-              <br>
+    <main>
+      <div class="container">
+        <div class="row justify-content-center pt-4 pb-2">
+          <div class="col-lg-8">
+            <div class="row">
+              {% if given %}
+              <div class="col-md-6">
+                <h5 class="lead">Success!</h5>
+                <div class="row">
+                  <div class="col-12 d-flex justify-content-between mt-3">
+                    <p class="text-start">
+                      <svg class="bi" width="32" height="32"><use xlink:href="#wallet-fill" /></svg>
+                      <img class="coin-deposit" src="img/banano-icon.png" />
+                    </p>
+                    <p class="text-end">
+                      <span class="text-deposit small">+{{ amount }} BAN</span>
+                      <svg class="bi" width="32" height="32"><use xlink:href="#wallet-fill" /></svg>
+                    </p>
+                  </div>
+                </div>
+                <p>{{ amount }} BAN has been sent to: <span class="text-wrap text-address">{{ given_to }}</span>. <a href="https://creeper.banano.cc/hash/{{ tx }}" taget="_blank" rel="noopener noreferrer">View on explorer</a>.</p>
+              </div>
+              <div class="col-md-6">
+                <h5 class="lead">Current Faucet Balance:</h5>
+                <p class="address-wrap fs-2 text-end"><b>{{ current_bal }} BANANO</b></p>
+                <p>Come back in {{ claim_time_str }} to claim again. If the faucet has more than 100 BAN, payouts will increase.</p>
+              </div>
+              <div class="col-md-6">
+                <h5 class="lead">Donations</h5>
+                <p class="text-wrap text-address">Donations keep the faucet running, please consider donating to the faucet to (click to copy): <a href="#" type="text/html" id="copyFaucetAddress" onClick="copyToClipboard('copyFaucetAddress')">{{ faucet_address }}</a></p>
+              </div>
+              <div class="col-md-6">
+                <h5 class="lead">Development Fund</h5>
+                <p>Additionally, you also can donate to the faucet development fund (click to copy): <a class="text-wrap text-address" href="#" type="text/html" id="copyFundAddress" onClick="copyToClipboard('copyFundAddress')">ban_3pdripjhteyymwjnaspc5nd96gyxgcdxcskiwwwoqxttnrncrxi974riid94</a></p>
+              </div>
+              {% if sponsor %}
+              <div class="col-12">
+                <h5 class="lead">Sponsor:</h5>
+                <p>A big thank you to our sponsor:</p>
+                <div class="d-grid mb-4">
+                  <a type="text/html" class="btn btn-primary" href="{{ sponsor.link }}" target="_blank" rel="noopener noreferrer">{{ sponsor.name }}</a>
+                </div>
+              </div>
+              {% endif %}
+              {% else %}
+              {% if notice %}
+              <div class="col-12">
+                <div class="alert alert-success alert-dismissible shadow display" role="alert">
+                  <h5 class="lead">{{ notice.title }}</h5>
+                  <p class="mb-0">{{ notice.content }}</p>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  {% if notice.link %}
+                  <a class="btn btn-primary mt-3" type="text/html" href="{{ notice.link }}" target="_blank" rel="noopener noreferrer">Take me there!</a>
+                  {% endif %}
+                </div>
+              </div>
+              {% endif %}
+              <div class="col-12">
+                <form method="POST" action="{% if default_faucet === 'banano' %}/{% else %}/banano{% endif %}" id="form">
+                  <div class="form-group">
+                    <label for="address" class="form-label lead">Banano Address:</label>
+                    <input type="text" class="form-control border-light mb-2" id="address" name="address" placeholder="ban_..." required />
+                  </div>
+                  <div id="clientErrors"></div>
+                  <div id="hcaptcha" class="h-captcha" data-sitekey="{{ sitekey }}" data-theme="dark" data-size="invisible" data-callback="captchaSubmit" data-chalexpired-callback="captchaExpired" data-open-callback="captchaOpen" data-close-callback="captchaClose" data-error-callback="captchaError">
+                    <input type="hidden" name="g-recaptcha-response" value="" />
+                  </div>
+                  <div class="d-grid mb-3">
+                    <button type="submit" id="buttonElement" class="btn btn-primary">Get Free Banano</button>
+                  </div>
+                </form>
+              </div>
+              <div class="col-md-6 mr-auto">
+                <h5>What is Banano?</h5>
+                <p>Banano is a fork coin of Nano, with the same feeless and fast technology but more emphasis of fun, teaching beginners, and community. <a class="alink" href="https://banano.cc/" target="_blank" rel="noopener noreferrer">Learn more</a> or <a class="alink" href="https://vault.banano.cc/" target="_blank" rel="noopener noreferrer">get an address</a>.</p>
+              </div>
+              <div class="col-md-6 ml-auto">
+                <h5>Donations</h5>
+                <p class="text-wrap">Please consider donating to the faucet to the following address (click to copy): <a class="text-address" href="#" type="text/html" id="copyBanAddr" onClick="copyToClipboard('copyBanAddr')">{{ faucet_address }}</a></p>
+              </div>
             </div>
-          {% endif %}
-          <div id="checkbox"></div>
-          <div class="btn-container">
-            <button type="submit">Get Free Banano</button>
+            {% endif %}
           </div>
-        </form>
-        <b><a href="https://banano.cc/">What is Banano and how do I get a Banano Address?</a></b>
-      {% endif %}
+        </div>
+      </div>
     </main>
-    <footer>
-      <p>
-        <a href="https://ibb.co/0XxGNqt" target="_blank">
-          Frontend courtesy of: Ape Lincoln for President of the Banunion
-        </a>
-        <!--Frontend by Salty Walty (ban address: ban_3w8pj471g6octbqjfqrgot15fsbf3erx94qa4r7benyrn3mobnqa97sty6x7 )-->
-      </p>
+    <footer class="footer mt-auto">
+      <div class="container">
+        <div class="small text-center">
+          <!-- Original front-end by Salty Walty ( ban_3w8pj471g6octbqjfqrgot15fsbf3erx94qa4r7benyrn3mobnqa97sty6x7 ) -->
+          <!-- Updated by HalfBakedBread -->
+          <p class="mt-3 mb-1">Frontend courtesy of <a href="https://ibb.co/0XxGNqt" target="_blank" rel="noopener noreferrer">Ape Lincoln for President of the Banunion</a>.</p>
+          <p class="small">This site is protected by hCaptcha and its <a href="https://hcaptcha.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://hcaptcha.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.</p>
+        </div>
+      </div>
     </footer>
     <script>
-      let input = document.createElement('input');
-      input.required = true;
-      let id = String(Math.floor(Math.random() * (99 - 0 + 1) + 0))
-      input.id = id;
-      input.type = "checkbox";
-      document.getElementById('checkbox').appendChild(input);
-      let label = document.createElement('label');
-      label.innerText = "I am not a bot";
-      label.htmlFor = id;
-      document.getElementById('checkbox').appendChild(label);
+      const serverGiven = '{{ given }}' === 'true';
+      const serverErrors = '{{ errors }}';
+      const serverIdentifier = '{{ coin }}';
+      const claimingAddress = '{{ given_to }}';
     </script>
+    <script src="https://hcaptcha.com/1/api.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@bananocoin/bananojs@2.7.10/dist/bananocoin-bananojs.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <script src="js/bundle.js"></script>
   </body>
 </html>
