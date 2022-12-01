@@ -1,4 +1,5 @@
 # Configuration
+
 The faucet configuration is very easy to do, but it is known that JSON can be quite unforgiving to unexperienced eyes. Carefully setting up the `config.json` file will make the deployment a very straightforward process.
 
 Even though the `config.json` file can look intimidating, there are only a handful of properties you need to set up to run the faucet.
@@ -6,6 +7,7 @@ Even though the `config.json` file can look intimidating, there are only a handf
 ## Properties description
 
 ### Global `config.json` properties
+
 - `self`: The url of your faucet, might cause problems if set incorrectly
 - `name`: The name of your faucet. Do not remove `<coin>` as it will be replaced with the name of the coins enabled
 - `db`: Database. MongoDB is hardcoded, so this should not be changed
@@ -15,16 +17,19 @@ Even though the `config.json` file can look intimidating, there are only a handf
 - `unopened_reduced_payouts`: Set to `true` to reduce payouts to unopened accounts
 
 ### `secrets` properties
+
 ***Warning:*** *Do NOT declare seeds or private keys inside this property as it is a very unsafe practice, instead use a `.env` file.* _See [secrets.md](secrets.md)_
 - `use_env`: Defaults to `true`. Do not change
 
 ### `notice` properties
+
 Set to `false` if you do not want to display any notice.
 - `title`: The title of the notice 
 - `content`: The content of the notice 
 - `link`: The link inside of the notice. Set to `false` if you do not want to display a link.
 
 ### `sponsor` properties
+
 Set to `false` if you do not want to display any sponsor. *Only works for Banano*
 
 - `name`: The name of the sponsor 
@@ -45,17 +50,20 @@ Set to `false` if you do not want to display any sponsor. *Only works for Banano
 - `rpc`: RPC url of the node that the faucet will use to communicate with the coin's network
 
 ### `payout` properties of `coin` property
+
 - `min_payout`: Minimum amount to give in the coin's designation.
 - `max_payout`: Maximum amount to give in the coin's designation.
 - `percentage`: Set a percentage amount of the entire available balance to give.
 
 ### `token` properties of `coin` if key name is `vite`
+
 Set to `false` if you do not want to use a Vite token
 - `id`: Id of the Vite token to use
 - `amount`: Maximum amount to give in the token's designation
 - `decimals`: Number of decimals in the token's desination
 
 ## Production ready `config.json` reference file
+
 Please do not copy the settings used below, instead use them as reference to create your own file.
 
 This `config.json` example will deploy a Banano and a Vite faucets with default logos, a notice, a sponsor, an index page and Prussia Captcha Splash Middleware activated.

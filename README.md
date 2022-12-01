@@ -45,12 +45,11 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
     <li>
       <a href="#usage">Usage</a>
       <ul>
-        <li><a href="#captcha-and-security">Captcha and Security</a></li>
-        <li><a href="#why-run-a-faucet">Why run a Faucet</a></li>
+        <li><a href="#captcha-and-security">Captcha and security</a></li>
+        <li><a href="#why-run-a-faucet">Why run a faucet</a></li>
         <li><a href="#advanced">Advanced</a></li>
       </ul>
     </li>
@@ -138,17 +137,17 @@ If you are using Repl.it installing/updating npm is optional.
 
 ## Usage
 
-### Why run a Faucet
-
-Running a faucet is unlikely to be profitable, but it may help promote your project, serve as a bit of charity, or be a hobby project.
-
-Getting a sponsor may help offset the costs of running a faucet.
-
 ### Captcha and security
 
 A captcha is essential for keeping out automated botting of the faucet, which will deplete funds and prevent real users from using it.
 
 _For more information, please refer to  [captcha.md](captcha.md)_
+
+### Why run a faucet
+
+Running a faucet is unlikely to be profitable, but it may help promote your project, serve as a bit of charity, or be a hobby project.
+
+Getting a sponsor may help offset the costs of running a faucet.
 
 ### Advanced
 
