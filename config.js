@@ -146,7 +146,6 @@ if (process.argv[2] === 'packagesetup') {
     scripts: {
       main: 'set NODE_ENV=production & node index.js',
       dev: 'set NODE_ENV=development & nodemon -r dotenv/config ./index.js',
-      packagesetup: 'node config.js packagesetup',
     },
     keywords: package_keywords,
     author: 'Jetstream0 <@prussia.dev>',

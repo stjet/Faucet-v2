@@ -107,12 +107,12 @@ If you are using Repl.it installing/updating npm is optional.
 ### Installation
 
 1. Get a [MongoDB](https://www.mongodb.com) and [hCaptcha](https://www.hcaptcha.com/) accounts, both are free
-2. Get a seed/secret key for the faucets you want to use (Only Nano, Banano, xDai and Vite are available). _See [secrets.md](secrets.md)_
+2. Get a seed/secret key for the faucets you want to use (Only Nano, Banano, xDai and Vite are available). _see [documentation/secrets.md](documentation/secrets.md)_
 3. Clone the repo
    ```sh
    git clone https://github.com/jetstream0/faucet-v2.git
    ```
-4. Edit `config.json` with your preferences. _See [config.md](config.md)_
+4. Edit `config.json` with your preferences. _see [documentation/config.md](documentation/config.md)_
 5. Generate a custom `package.json` file with the package generator
    ```sh
    node config.js packagesetup
@@ -121,7 +121,7 @@ If you are using Repl.it installing/updating npm is optional.
    ```sh
    npm install
    ```
-7. Enter your secrets in the `.env` file. If you are using Repl.it this can be done using the project manager. _See [secrets.md](secrets.md)_
+7. Enter your secrets in the `.env` file. If you are using Repl.it this can be done using the project manager. _see [documentation/secrets.md](documentation/secrets.md)_
 8. That's everything! You can now run the faucet with
    ```sh
    npm run main
@@ -141,7 +141,7 @@ If you are using Repl.it installing/updating npm is optional.
 
 A captcha is essential for keeping out automated botting of the faucet, which will deplete funds and prevent real users from using it.
 
-_For more information, please refer to  [captcha.md](captcha.md)_
+_For more information, please refer to  [documentation/captcha.md](documentation/captcha.md)_
 
 ### Why run a faucet
 
@@ -162,7 +162,7 @@ For more customized faucets, it is recommended that you know JavaScript, HTML, a
 - [x] Add security packages
 - [x] Add Front-end verification
 - [x] Update templates
-- [x] Implement Prussia Captcha Splash Middleware. See [captcha.md](captcha.md#about-the-prussia-captcha-splash-middleware)
+- [x] Implement Prussia Captcha Splash Middleware. _see [documentation/captcha.md](documentation/captcha.md#about-the-prussia-captcha-splash-middleware)_
 - [x] Add address checks for every coin
 - [x] Add invisible captcha
 - [x] Documentation

@@ -107,7 +107,7 @@ app.use([
     } else {
       res.status(500);
       res.locals.error = {
-        status: '500 Interal Server Error',
+        status: '500 Internal Server Error',
         message: 'Something went wrong, please contact the developer if the problem persists.',
       };
     }

@@ -95,7 +95,7 @@ async function post_vite(req, res, next) {
     // Send Vite
     if (!errors) {
       // With vite, we may want to send tokens also.
-      const success = await vite.send(private_key, faucet_address, payout, {
+      const success = await vite.send(private_key, faucet_address, address, payout, {
         send_vite: send_vite,
         send_token: send_token,
         token_id: config.vite?.token?.id,
