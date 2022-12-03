@@ -1,87 +1,56 @@
 const nanojs = require('nanojs');
-const config = require("../config.js");
 
-const rpc_url = config.nano.rpc
-
-nanojs.setBananodeApiUrl(rpc_url);
-
-if (config.nano.auth) {
-  if (config.secrets.use_env) {
-    nanojs.setAuth(process.env.nano_apikey);
-  } else {
-    nanojs.setAuth(config.nano.auth);
-  }
+async function set_rpc(url) {
+  nanojs.setBananodeApiUrl(url);
 }
 
-let seed;
-if (config.secrets.use_env) {
-  seed = process.env.bn_seed;
-} else {
-  seed = config.secrets.bn_seed;
+async function set_auth(key) {
+  nanojs.setAuth(key);
 }
 
-//amount is in whole nano, not raw. Eg: amount=4.2 sends 4.2 nano
-async function send(address, amount) {
+// Amount is in whole nano, not raw. I.e. 'amount = 4.2' sends 4.2 XNO
+async function send(seed, address, amount) {
   try {
-    await nanojs.sendNanoWithdrawalFromSeed(seed, 0, address, amount);
-    return true;
-  } catch (e) {
+    const tx = await nanojs.sendNanoWithdrawalFromSeed(seed, 0, address, amount);
+    return tx;
+  } catch (error) {
     return false;
   }
 }
 
-async function get_account_history(address, amount=-1) {
+async function get_account_history(address, amount = -1) {
   try {
-    let account_history = await nanojs.getAccountHistory(address, amount);
+    const account_history = await nanojs.getAccountHistory(address, amount);
     return account_history.history;
-  } catch (e) {
-    console.log("address error: "+address);
+  } catch (error) {
     return false;
   }
 }
 
-//precision to 2 digits, round down (floor)
+// Precision to 2 digits, round down (floor)
 async function check_bal(address) {
   let raw_bal = await nanojs.getAccountBalanceRaw(address);
   let bal_parts = await nanojs.getNanoPartsFromRaw(raw_bal);
-  return Number(bal_parts.nano)+Number(bal_parts.nanoshi)/1000000;
+  return Number(bal_parts.nano) + Number(bal_parts.nanoshi) / 1000000;
 }
 
-async function dry() {
-  let bal = await check_bal(config.nano.address);
-  //future: make this relative to payouts
-  if (Number(bal) < 0.1) {
-    return true;
-  }
-  return false;
+async function dry(address) {
+  let bal = await check_bal(address);
+  // TODO: Make this relative to payouts
+  if (Number(bal) < 0.1) return true;
+  else return false;
 }
 
-function address_related_to_blacklist(account_history, blacklisted_addresses) {
-  if (account_history.history) {
-    for (let i=0; i < account_history.history.length; i++) {
-      if (account_history.history[i].type == "send" && blacklisted_addresses.includes(account_history.history[i].account)) {
-        return true;
-      }
-    }
-  }
-  return false;
+async function is_unopened(address, amount = -1) {
+  let account_history = await nanojs.getAccountHistory(address, amount);
+  if (account_history.history == '') return true;
+  else return false;
 }
 
-async function is_unopened(address) {
-  let account_history = await nanojs.getAccountHistory(address, -1);
-  if (account_history.history == '') {
-    return true;
-  }
-  return false;
-}
- 
-async function receive_deposits() {
-  let rep = await nanojs.getAccountInfo(await nanojs.getNanoAccountFromSeed(process.env.seed, 0), true);
-  rep = rep.representative;
-  if (!rep) {
-    //set self as rep if no other set rep
-    await nanojs.receiveNanoDepositsForSeed(process.env.seed, 0, await nanojs.getNanoAccountFromSeed(process.env.seed, 0));
-  }
+async function receive_deposits(seed) {
+  let rep = await nanojs.getAccountInfo(await nanojs.getNanoAccountFromSeed(seed, 0), true);
+  // Set self as rep if no other set rep
+  if (!rep?.representative) await nanojs.receiveNanoDepositsForSeed(process.env.seed, 0, await nanojs.getNanoAccountFromSeed(process.env.seed, 0));
   await nanojs.receiveNanoDepositsForSeed(process.env.seed, 0, rep);
 }
 
@@ -90,12 +59,13 @@ function is_valid(address) {
 }
 
 module.exports = {
+  set_rpc: set_rpc,
+  set_auth: set_auth,
   send: send,
   dry: dry,
   check_bal: check_bal,
   receive_deposits: receive_deposits,
-  address_related_to_blacklist: address_related_to_blacklist,
   is_unopened: is_unopened,
   get_account_history: get_account_history,
-  is_valid: is_valid
-}
+  is_valid: is_valid,
+};

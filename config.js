@@ -1,177 +1,163 @@
-//read config, export variables
 const fs = require('fs');
 
+// Constants
+const DEFAULT_COINS = ['xdai', 'banano', 'nano', 'vite'];
+const DEFAULT_COIN_SETTINGS = [
+  {
+    name: 'xdai',
+    rpc: 'https://rpc.gnosischain.com',
+    deps: [{ ethers: '^5.7.2' }],
+  },
+  {
+    name: 'banano',
+    rpc: 'https://kaliumapi.appditto.com/api',
+    deps: [{ bananojs: 'npm:@bananocoin/bananojs@^2.7.10' }],
+  },
+  {
+    name: 'nano',
+    rpc: 'https://proxy.nanos.cc/proxy',
+    deps: [{ nanojs: 'npm:@bananocoin/bananojs@^2.7.10' }],
+  },
+  {
+    name: 'vite',
+    rpc: 'https://node-vite.thomiz.dev',
+    deps: [{ '@vite/vitejs': '^2.3.19' }, { '@vite/vitejs-http': '^2.3.19' }],
+  },
+];
+
+// Parse config.json
 let config = JSON.parse(fs.readFileSync('config.json'));
 
-let coins = ['xdai', 'banano', 'nano', 'vite'];
-
-//throw error if required is missing
-let required = ['name', 'db', 'captcha', 'secrets']
-for (let r_num = 0; r_num < required.length; r_num++) {
-  let key = config[required[r_num]];
-  if (key == undefined) {
-    throw new Error('Required key in config `'+key+'` is missing');
+// Throw error if required is missing
+const required = ['name', 'db', 'captcha', 'secrets'];
+for (let i in required) {
+  if (!Object.keys(config).includes(required[i])) {
+    throw new Error(`Required key in config ${required[i]} is missing`);
   }
 }
 
-//this is just to make sure user uploaded their logo
-if (!config.logo) {
-	throw new Error("Make sure to upload LOGO.png to files/ and add a json value 'logo' as true to the config.json");
+// This is just to make sure user uploaded their logo
+if (config.logo === undefined) {
+  throw new Error('Make sure to upload logo.png to files/img/ and add a json value "logo" as true to the config.json');
 }
 
-if (!config.captcha.use || !['hcaptcha', 'prussia_captcha'].includes(config.captcha.use)) {
-  throw new Error('Missing or invalid captcha use in config');
+if ((process.env.NODE_ENV || '').trim() === 'development') {
+  config.debug = true;
 }
 
-//random captcha per run
-if (config.captcha.use == "both") {
-  config.captcha.use = ["hcaptcha", "prussia_captcha"][Math.floor(Math.random()*2)]
-}
-
-//secrets stuff
-
-//see if optional keys exist, if not put them with default values
-if (config.api == undefined) {
-  config.api = false;
-}
-if (config.debug == undefined) {
-  config.api = false;
-}
-if (config.port == undefined) {
-  config.port = 8080;
-}
-if (config.owner == undefined) {
-  config.owner = 'Unknown';
-}
-if (config.favicon == undefined) {
-  config.favicon = false;
-}
-if (config.unopened_reduced_payouts == undefined) {
-  config.unopened_reduced_payouts = false;
-}
-
-if (config.faucet_name == undefined) {
-  config.faucet_name = config.owner+" Faucet"
-}
+// See if optional keys exist, if not put them with default values
+if (config.port === undefined) config.port = 8080;
+if (config.api === undefined) config.api = false;
+if (config.owner === undefined) config.owner = 'Unknown';
+if (config.notice === undefined) config.notice = false;
+if (config.sponsor === undefined) config.sponsor = false;
+if (config.captcha.use_splash === undefined) config.captcha.use_splash = false;
+if (config.faucet_name === undefined) config.faucet_name = config.owner + ' Faucet';
+if (config.unopened_reduced_payouts === undefined) config.unopened_reduced_payouts = false;
 
 let enabled_coins = [];
-for (let c_num = 0; c_num < coins.length; c_num++) {
-  let coin = coins[c_num];
-  if (config[coin] == undefined) {
-    config[coin] = {enabled: false};
+
+for (let c_num = 0; c_num < DEFAULT_COIN_SETTINGS.length; c_num++) {
+  let coin = DEFAULT_COIN_SETTINGS[c_num];
+
+  if (DEFAULT_COINS.includes(coin.name) && config[coin.name] === coin.name) {
+    if (config[coin.name] === undefined) config[coin.name] = { enabled: false };
   }
-  let default_rpcs = ['https://rpc.gnosischain.com', 'https://kaliumapi.appditto.com/api', 'https://proxy.nanos.cc/proxy', 'https://node-vite.thomiz.dev'];
-  if (config[coin].enabled) {
+  if (config[coin.name].enabled === true) {
     enabled_coins.push(coin);
 
-    if (config[coin].claim_frequency == undefined || isNaN(config[coin].claim_frequency)) {
-      throw new Error('Missing '+coin+' claim frequency, or claim frequency not a number')
+    // TODO: Check if secrets are defined
+
+    if (config[coin.name].claim_frequency === undefined || isNaN(config[coin.name].claim_frequency)) {
+      throw new Error(`Missing ${coin} claim frequency, or claim frequency not a number`);
     }
 
-    if (config[coin].claim_frequency < 1000*60*10) {
-      throw new Error('A claim frequency is less than 10 minutes. This... is a bad idea. Remember, the value is in milliseconds.')
+    if (config[coin.name].claim_frequency < 1000 * 60 * 10) {
+      throw new Error('Claim frequency is less than 10 minutes. This... is a bad idea. Remember, the value is in milliseconds!');
     }
 
-    if (!config[coin].address) {
-      throw new Error('Faucet address for coin "'+coin+'" required, but missing')
+    if (config[coin.name].address === undefined) {
+      throw new Error(`Faucet address for coin ${coin} required, but missing`);
     }
-    
-    if (config[coin].rpc == undefined) {
-      config[coin].rpc = default_rpcs[c_num];
+
+    if (!config[coin.name].rpc && coin.name === DEFAULT_COIN_SETTINGS[c_num].name) {
+      config[coin.name].rpc = DEFAULT_COIN_SETTINGS[c_num].rpc;
     }
-    if (config[coin].default == undefined) {
-      config[coin].default = false;
+
+    if (config[coin.name].default === undefined) {
+      config[coin.name].default = false;
     }
-    //if `percentage` is false, will be random in between max and min. if `percentage` is not false, `percentage` will be the percent (decimal) of the faucet bal it should be, still adhering to max and min
-    if (config[coin].payouts.percentage == undefined) {
-      config[coin].payouts.percentage = false;
+
+    // If 'percentage' is false, it will be set to a random amount in between max and min.
+    // If 'percentage' is not false, 'percentage' will be the percent (decimal) of the faucet
+    // balance and it should be still adhering to max and min.
+    if (config[coin.name].payouts.percentage === undefined) {
+      config[coin.name].payouts.percentage = false;
     }
-		if (config[coin].payouts.min_payout > config[coin].payouts.max_payout) {
-			throw new Error("Min payout cannot be more than max payout");
-		}
+
+    if (config[coin.name].payouts.min_payout > config[coin.name].payouts.max_payout) {
+      throw new Error('Minimum payout cannot be higher than maximum payout');
+    }
   }
 }
 
-config.enabled_coins = enabled_coins;
-
-//add blacklist to config
 config.blacklist = JSON.parse(fs.readFileSync('blacklist.json'));
+config.enabled_coins = enabled_coins.map((enabled_coin) => enabled_coin.name);
+config.enabled_coins_paths = enabled_coins.map((enabled_coin) => '/' + enabled_coin.name);
 
-if (process.argv[2] == "packagesetup") {
-  /* create a package.json file based on settings, including command to run index.js (with parameters ofc) */
+// Create a package.json file based on settings, including command to run index.js (with parameters ofc)
+if (process.argv[2] === 'packagesetup') {
+  if (config.enabled_coins.length === 0) throw new Error('Faucet has no coins enabled');
 
-  //description, dependencies, keywords
-  //add node fetch to deps? or maybe axios
-  let dependencies = {'nunjucks': '^3.2.3', 'express': '^4.17.1', 'body-parser': '^1.19.0', 'cookie-parser': '^1.4.5', 'mongodb': '^3.6.6', 'node-fetch': '2.6.7', 'big.js': '6.1.1'};
-  let coin_deps = {
-    'xdai': ['ethers', '^5.5.1'],
-    'banano': ['bananojs', 'npm:@bananocoin/bananojs@^2.4.24'],
-    'nano': ['nanojs', 'npm:@bananocoin/bananojs@^2.4.24'],
-    'vite': ['@vite/vitejs', '^2.3.18', '@vite/vitejs-http', '^2.3.18']
+  // Description, dependencies, keywords
+  let keywords = ['crypto', 'faucet'];
+  let description = [];
+  let dependencies = {
+    'big.js': '6.2.1',
+    compression: '^1.7.4',
+    'cookie-parser': '^1.4.6',
+    express: '^4.18.2',
+    mongodb: '^4.12.0',
+    'node-fetch': '^2.6.7',
+    nunjucks: '^3.2.3',
   };
 
-  //add dependencies
-  let activated_coin_num = 0;
-  for (let c_num2 = 0; c_num2 < coins.length; c_num2++) {
-    let coin = coins[c_num2];
-    if (config[coin].enabled) {
-      activated_coin_num++;
-      for (let c_dep=0; c_dep < Math.floor(coin_deps[coin].length/2); c_dep++) {
-        dependencies[coin_deps[coin][c_dep*2]] = coin_deps[coin][c_dep*2+1];
-      }
+  // I think this implementation is quite more mantainable
+  for (let c_num = 0; c_num < enabled_coins.length; c_num++) {
+    let coin = enabled_coins[c_num];
+    if (DEFAULT_COINS.includes(coin.name) && c_num !== enabled_coins.length) {
+      for (let c_deps in coin.deps) Object.assign(dependencies, coin.deps[c_deps]);
+      description.push(coin.name);
+      keywords.push(coin.name);
     }
   }
 
-  if (activated_coin_num == 0) {
-    throw new Error('Faucet has no coins');
-  }
+  // Build package
+  const package_dependencies = dependencies;
+  const package_keywords = keywords;
+  const package_description = `A ${description.join(', ')} cryptocurrency faucet made by Prussia and run by ${config.owner}`;
 
-  //generate description, keywords
-  let keywords = ['"crypto"','"faucet"'];
-  let description = 'A ';
-  for (let c_num2 = 0; c_num2 < coins.length; c_num2++) {
-    let coin = coins[c_num2];
-    if (config[coin].enabled) {
-      keywords.push('"'+coin+'"');
-      if (c_num2 == coins.length) {
-        description += coin+' ';
-      } else if (activated_coin_num != 1) {
-        description += coin+', ';
-      } else {
-        description += coin+' ';
-      }
-    }
-  }
-  description += 'cryptocurrency faucet made by Prussia. And run by ';
-  description += config.owner;
-
-//change dependencies into readable form
-  let dependencies_string = "";
-  for (let dep_num=0; dep_num < Object.keys(dependencies).length; dep_num++) {
-    dependencies_string += '\n      "'+Object.keys(dependencies)[dep_num]+'": '+'"'+dependencies[Object.keys(dependencies)[dep_num]]+'"';
-    if (dep_num != Object.keys(dependencies).length-1) {
-      dependencies_string += ',';
-    }
-  }
-
-  let package_js_npm_str = `{
-    "name": "Prussia-Faucet",
-    "version": "2.0.0",
-    "description": "`+description+`",
-    "main": "index.js",
-    "scripts": {
-      "main": "node index.js",
-      "packagesetup": "node config.js packagesetup"
+  // JSON stands for JavaScript Object Notation so we don't really need string manipulation
+  const package = {
+    name: 'faucet-v2',
+    version: '2.1.9',
+    description: package_description,
+    main: 'index.js',
+    scripts: {
+      main: 'set NODE_ENV=production & node index.js',
+      dev: 'set NODE_ENV=development & nodemon -r dotenv/config ./index.js',
     },
-    "keywords": [`+keywords.join(', ')+`],
-    "author": "Jetstream0 <@prussia.dev>",
-    "license": "MIT",
-    "dependencies": {`+dependencies_string+`
-    }
-}`;
+    keywords: package_keywords,
+    author: 'Jetstream0 <@prussia.dev>',
+    license: 'MIT',
+    dependencies: package_dependencies,
+    devDependencies: {
+      dotenv: '^16.0.3',
+      nodemon: '^2.0.20',
+    },
+  };
 
-  //write to package.json
-  fs.writeFileSync('package.json', package_js_npm_str);
+  fs.writeFileSync('package.json', JSON.stringify(package, null, 2));
 }
 
 module.exports = config;

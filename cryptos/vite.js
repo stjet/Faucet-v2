@@ -1,85 +1,63 @@
 const vite = require('@vite/vitejs');
 const { HTTP_RPC } = require('@vite/vitejs-http');
-const config = require("../config.js");
 const Big = require('big.js');
 
-//https://docs.vite.org/vite-docs/vite.js/
-//https://docs.vite.org/vite-docs/vite.js/accountBlock/createAccountBlock.html
-//https://docs.vite.org/vite-docs/api/rpc/ledger_v2.html#
+/* Vite Documentation
+ * https://docs.vite.org/vite-docs/vite.js/
+ * https://docs.vite.org/vite-docs/vite.js/accountBlock/createAccountBlock.html
+ * https://docs.vite.org/vite-docs/api/rpc/ledger_v2.html#
+ */
 
-let privKey;
-if (config.secrets.use_env) {
-  privKey = process.env.vite_privkey;
-} else {
-  privKey = config.secrets.vite_privkey;
+// Vite setup
+let rpc, provider;
+
+const set_rpc = (url) => {
+  rpc = new HTTP_RPC(url);
+  provider = new vite.ViteAPI(rpc);
+};
+
+async function receive(address, private_key) {
+  // Auto receive
+  let receive = new vite.accountBlock.ReceiveAccountBlockTask({
+    address: address,
+    privateKey: private_key,
+    provider: provider,
+  });
+
+  receive.start();
 }
 
-//send both VITC token and VITE
-//token can be undefined
-let token_id;
-let token_amount;
-let faucet_address = config.vite.address;
-if (config.vite.token) {
-  token_id = config.vite.token.id;
-  token_amount = config.vite.token.amount;
+async function check_bal(address, check_token = false, token_id = undefined) {
+  try {
+    // ledger_getAccountInfoByAddress
+    let resp = await provider.request('ledger_getAccountInfoByAddress', address);
+    // This is VITE
+    let token_resp = resp.balanceInfoMap?.[token_id];
+    // Token id of VITE
+    let vite_resp = resp.balanceInfoMap['tti_5649544520544f4b454e6e40'];
+    if (check_token) {
+      let re = [];
+      if (!vite_resp) re.push(false);
+      else re.push(vite_resp.balance * 10 ** -vite_resp.tokenInfo.decimals);
+
+      if (!token_resp) re.push(false);
+      else re.push(token_resp.balance * 10 ** -token_resp.tokenInfo.decimals);
+
+      return re;
+    }
+
+    return [vite_resp.balance * 10 ** -vite_resp.tokenInfo.decimals, false];
+  } catch (error) {
+    // This will be called if node is not available
+    return [0, false];
+  }
 }
 
-//if true, facuet will work with token only if there is no supply of VITE
-let token_only = config.vite.optional;
-
-//set provider
-const rpc_url = config.vite.rpc;
-
-let provider = new vite.ViteAPI(new HTTP_RPC(rpc_url));
-
-//auto receive
-let receive = new vite.accountBlock.ReceiveAccountBlockTask({
-  address: faucet_address,
-  privateKey: privKey,
-  provider: provider
-});
-
-receive.start();
-
-async function check_bal(address) {
-  //ledger_getAccountInfoByAddress
-  let resp = await provider.request('ledger_getAccountInfoByAddress', address);
-  //this is vite
-  let token_resp = resp.balanceInfoMap?.[token_id]
-  //token id of VITE
-  let vite_resp = resp.balanceInfoMap['tti_5649544520544f4b454e6e40'];
-  if (config.vite.token) {
-    let re = [];
-    if (!vite_resp) {
-      re.push(false);
-    } else {
-      re.push(vite_resp.balance*(10**-vite_resp.tokenInfo.decimals));
-    }
-    if (!token_resp) {
-      re.push(false);
-    } else {
-      re.push(token_resp.balance*(10**-token_resp.tokenInfo.decimals));
-    }
-    return re;
-  }
-  return [vite_resp.balance*(10**-vite_resp.tokenInfo.decimals), false];
-}
-
-async function dry() {
-  let dry_info = {
-    token: false,
-    coin: false
-  }
-  let bal = await check_bal(faucet_address);
-  if (bal[0] < 1) {
-    dry_info.coin = true;
-  }
-  if (bal[1] === false) {
-  } else {
-    if (bal[1] < config.vite.token.amount) {
-      dry_info.token = true;
-    }
-  }
+async function dry(address, check_token = false, token_id = undefined, token_min_amount = 0) {
+  let dry_info = { token: false, coin: false };
+  let bal = await check_bal(address, check_token, token_id);
+  if (bal[0] < 1) dry_info.coin = true;
+  if (bal[1] !== false && bal[1] < token_min_amount) dry_info.token = true;
   return dry_info;
 }
 
@@ -89,87 +67,108 @@ async function get_account_history(address) {
 }
 
 async function is_unopened(address) {
-  if (Object.keys(await get_account_history(address)).length == 0) {
-    return true;
-  }
-  return false;
+  if (Object.keys(await get_account_history(address)).length == 0) return true;
+  else return false;
 }
 
-async function send(address, amount, send_vite=true, send_token=true) {
-  //createAccountBlock
-  //ledger_sendRawTransaction
-  //send vite
-  //CONVERT AMOUNTS TO RAW (no decimals)
-  if (send_vite) {
-    let vite_send = vite.accountBlock.createAccountBlock('send', {
-      address: faucet_address,
-      toAddress: address,
-      tokenId: 'tti_5649544520544f4b454e6e40',
-      amount: Big(String(amount)+"e18").toFixed()
-    }).setProvider(provider).setPrivateKey(privKey);
+async function send(private_key, sender_address, address, amount, options) {
+  // createAccountBlock
+  // ledger_sendRawTransaction
+  // Send Vite
+  // CONVERT AMOUNTS TO RAW (no decimals)
 
-    const [quota, difficulty] = await Promise.all([provider.request("contract_getQuotaByAccount", faucet_address), vite_send.autoSetPreviousAccountBlock().then(() => provider.request("ledger_getPoWDifficulty", {
-        address: vite_send.address,
-        previousHash: vite_send.previousHash,
-        blockType: vite_send.blockType,
-        toAddress: vite_send.toAddress,
-        data: vite_send.data
-      }))
-  	])
+  if (options.send_vite) {
+    let vite_send = vite.accountBlock
+      .createAccountBlock('send', {
+        address: sender_address,
+        toAddress: address,
+        tokenId: 'tti_5649544520544f4b454e6e40',
+        amount: Big(String(amount) + 'e18').toFixed(),
+      })
+      .setProvider(provider)
+      .setPrivateKey(private_key);
 
-		const availableQuota = Big(quota.currentQuota);
-		if (availableQuota < difficulty.requiredQuota) {
-      await vite_send.PoW(difficulty.difficulty)
+    const [quota, difficulty] = await Promise.all([
+      provider.request('contract_getQuotaByAccount', sender_address),
+      vite_send.autoSetPreviousAccountBlock().then(() =>
+        provider.request('ledger_getPoWDifficulty', {
+          address: vite_send.address,
+          previousHash: vite_send.previousHash,
+          blockType: vite_send.blockType,
+          toAddress: vite_send.toAddress,
+          data: vite_send.data,
+        })
+      ),
+    ]);
+
+    const availableQuota = Big(quota.currentQuota);
+    if (availableQuota < difficulty.requiredQuota) {
+      await vite_send.PoW(difficulty.difficulty);
     }
-		
+
     try {
       let result = await vite_send.sign().send();
-    } catch (e) {
-      console.log(e)
+    } catch (error) {
+      // Return false if there was an error(?)
     }
   }
-  //send token
-  if (send_token && config.vite.token) {
-    let token_send = vite.accountBlock.createAccountBlock('send', {
-      "address": faucet_address,
-      "toAddress": address,
-      "tokenId": token_id,
-      "amount": Big(String(token_amount)+"e"+String(config.vite.token.decimals)).toFixed()
-    }).setProvider(provider).setPrivateKey(privKey);
 
-    const [quota, difficulty] = await Promise.all([provider.request("contract_getQuotaByAccount", faucet_address), token_send.autoSetPreviousAccountBlock().then(() => provider.request("ledger_getPoWDifficulty", {
-        address: token_send.address,
-        previousHash: token_send.previousHash,
-        blockType: token_send.blockType,
-        toAddress: token_send.toAddress,
-        data: token_send.data
-      }))
-  	])
+  // Send token
+  // Token can be undefined
+  if (options.send_token) {
+    let token_send = vite.accountBlock
+      .createAccountBlock('send', {
+        address: sender_address,
+        toAddress: address,
+        tokenId: options.token_id,
+        amount: Big(String(options.token_amount) + 'e' + String(options.token_decimals)).toFixed(),
+      })
+      .setProvider(provider)
+      .setPrivateKey(private_key);
 
-		const availableQuota = Big(quota.currentQuota);
-		if (availableQuota < difficulty.requiredQuota) {
-      await token_send.PoW(difficulty.difficulty)
+    const [quota, difficulty] = await Promise.all([
+      provider.request('contract_getQuotaByAccount', sender_address),
+      token_send.autoSetPreviousAccountBlock().then(() =>
+        provider.request('ledger_getPoWDifficulty', {
+          address: token_send.address,
+          previousHash: token_send.previousHash,
+          blockType: token_send.blockType,
+          toAddress: token_send.toAddress,
+          data: token_send.data,
+        })
+      ),
+    ]);
+
+    const availableQuota = Big(quota.currentQuota);
+    if (availableQuota < difficulty.requiredQuota) {
+      await token_send.PoW(difficulty.difficulty);
     }
-		
+
     try {
       let result = await token_send.sign().send();
-    } catch (e) {
-      console.log(e)
+    } catch (error) {
+      // Return false if there was an error(?)
     }
-    //how to see success? not sure
   }
   return true;
 }
 
-process.on('unhandledRejection', (err) => {
-	console.log(err)
-})
+async function is_valid(address) {
+  if (vite.wallet.isValidAddress(address) === 1) return true;
+  else return false;
+}
+
+process.on('unhandledRejection', (error) => {
+  // console.log(error);
+});
 
 module.exports = {
+  set_rpc: set_rpc,
   send: send,
   dry: dry,
   check_bal: check_bal,
-  get_account_history: get_account_history,
+  receive: receive,
   is_unopened: is_unopened,
-  receive: receive
-}
+  get_account_history: get_account_history,
+  is_valid: is_valid,
+};

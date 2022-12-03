@@ -1,4 +1,4 @@
-run = "npm run packagesetup; npm install; npm run main"
+run = "node config.js packagesetup; npm install; npm run main"
 
 [nix]
 channel = "stable-21_11"

@@ -1,589 +1,124 @@
 const config = require('./config.js');
-const captcha = require('./captcha.js');
+const path = require('path');
 const express = require('express');
+const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const nunjucks = require('nunjucks');
 
-const util = require('./util.js');
-
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-
-//templating, web server
-nunjucks.configure('templates', { autoescape: true });
-
+// Express setup
 const app = express();
 
-app.use(express.static('files'));
+// Templating engine
+nunjucks.configure('templates', { autoescape: true, express: app });
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// Express settings
+app.set('view engine', 'html');
+app.use(compression());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(process.env.captcha_secret));
+app.use(express.static(path.join(__dirname, 'files')));
 
-app.use(cookieParser());
+// Based on config currencies, set up default faucet and routes
+if (config.banano.default) app.locals.default_faucet = 'banano';
+else if (config.nano.default) app.locals.default_faucet = 'nano';
+else if (config.xdai.default) app.locals.default_faucet = 'xdai';
+else if (config.vite.default) app.locals.default_faucet = 'vite';
+else app.locals.default_faucet = null;
 
-//based on config currencies, set up web servers and import currencies
+// Then make it available to through the lifetime of the app
+const use_default = app.locals.default_faucet;
 
-const captcha_use = config.captcha.use;
-const faucet_name = config.name;
+// Prussia Captcha Splash Middleware
+if (config.captcha.use_splash) {
+  const splash = require('./utils/splash/middleware');
 
-//even if prussia captcha is being used, this is passed to nunjucks, and that is fine.
-const hcaptcha_sitekey = config.captcha.sitekey;
+  app.use(
+    splash({
+      captcha_title: config.name.replace('<coin>', ''),
+      valid_redirect_to: '/',
+      invalid_redirect_to: '/captcha',
+      authentication_paths: ['/captcha'],
+      protected_paths: config.enabled_coins_paths,
+    })
+  );
+}
 
-let default_found = false;
-
-let banano;
-let nano;
-let xdai;
-let vite;
+// Banano
 if (config.enabled_coins.includes('banano')) {
-  let ip_cache = {};
-  banano = require('./cryptos/banano.js');
-  let extra = {};
-  //turn this into claim time string
-  let claim_time_str = util.milliseconds_to_readable(config.banano.claim_frequency);
-  let faucet_address = config.banano.address;
-  async function banano_get_handler(req, res) {
-    let current_bal = await banano.check_bal(faucet_address);
-    let challenge_url, challenge_code, challenge_nonce;
-    if (captcha_use == 'prussia_captcha') {
-      //pass these to nunjucks
-      let captcha_info = await captcha.get_captcha();
-      challenge_url = captcha_info[0];
-      challenge_code = captcha_info[1];
-      challenge_nonce = captcha_info[2];
-    }
-    //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
-    return res.send(
-      nunjucks.render('banano.html', {
-        claim_time_str: claim_time_str,
-        faucet_name: faucet_name.replace("<coin>", "Banano"),
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        given: false,
-        amount: false,
-        faucet_address: faucet_address,
-        current_bal: current_bal,
-        errors: false,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        extra: extra,
-        is_default: config.banano.default
-      })
-    );
-  }
-  async function banano_post_handler(req, res) {
-    //claim_time_str, faucet_name, captcha, given, amount, faucet_address, current_bal, errors, (if prussia: challenge_url, challenge_code, challenge_nonce)
-    let errors = false;
-    let address = req.body.address;
-    if (!address) {
-      errors = "Invalid address";
-    } else {
-      //remove spaces
-      address = address.trim();
-    }
-    let amount = false;
-    let given = false;
-    let tx;
-    let current_bal = await banano.check_bal(faucet_address);
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) {
-      errors = 'Too many claims from this IP address';
-    }
-    //check faucet dry
-    if (await banano.dry()) {
-      errors = 'Faucet dry';
-    }
-    //check captcha
-    if (!captcha.came_from_site(req)) {
-      errors = 'Post request did not come from site';
-    }
-    let success = await captcha.get_captcha_success(req.body);
-    if (!success) {
-      errors = 'Failed or expired captcha';
-    }
-    let too_soon_db = await util.claim_too_soon_db(address, 'banano');
-    //check db
-    if (too_soon_db) {
-      errors = 'Last claim too soon';
-    }
-    //check cookies
-    let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, 'banano');
-    if (too_soon_cookies) {
-      errors = 'Last claim too soon';
-    }
-    //send banano
-    //payouts
-    let config_payouts = config.banano.payouts;
-    let challenge_url, challenge_code, challenge_nonce;
-    let payout = util.calculate_payouts(config_payouts);
-    let score = await banano.get_score(address);
-    //reduce payouts for suspicious accounts
-    if (config.unopened_reduced_payouts && (await banano.is_unopened(address))) {
-      payout = config.banano.payouts.min_payout * 0.5;
-    } else if (score > 5) {
-      payout = config.banano.payouts.min_payout * 0.5;
-    }
-    if (!banano.is_valid(address)) {
-      errors = "Invalid Banano address";
-    }
-    if (!errors) {
-      let success = await banano.send(address, payout);
-      tx = success;
-      if (!success) {
-        errors = 'Send failed';
-      } else {
-        given = true;
-        amount = util.format_amount_decimals(payout);
-        if (ip_cache[ip]) {
-          ip_cache[ip] = ip_cache[ip] + 1;
-        } else {
-          ip_cache[ip] = 1;
-        }
-        await util.add_to_db(address, 'banano');
-        util.add_to_cookies(res, 'banano');
-      }
-    } else {
-      if (captcha_use == 'prussia_captcha') {
-        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
-      }
-    }
-    return res.send(
-      nunjucks.render('banano.html', {
-        claim_time_str: claim_time_str,
-        faucet_name: faucet_name.replace("<coin>", "Banano"),
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        given: given,
-        amount: amount,
-        faucet_address: faucet_address,
-        current_bal: current_bal,
-        errors: errors,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        extra: extra,
-        is_default: config.banano.default,
-        tx: tx
-      })
-    );
-  }
-  //I am aware we can set a variable to the url path, but I think this is more readable
-  if (config.banano.default) {
-    default_found = true;
-    app.get('/', banano_get_handler);
-    app.post('/', banano_post_handler);
-  } else {
-    app.get('/banano', banano_get_handler);
-    app.post('/banano', banano_post_handler);
-  }
+  banano_controller = require('./controllers/banano.js');
+
+  app.get(use_default === 'banano' ? '/' : '/banano', banano_controller.get_banano);
+  app.post(use_default === 'banano' ? '/' : '/banano', banano_controller.post_banano);
 }
+
+// Nano
 if (config.enabled_coins.includes('nano')) {
-  let ip_cache = {};
-  nano = require('./cryptos/nano.js');
-  let extra = {};
-  //turn this into claim time string
-  let claim_time_str = util.milliseconds_to_readable(config.nano.claim_frequency);
-  let faucet_address = config.nano.address;
-  async function nano_get_handler(req, res) {
-    let current_bal = await nano.check_bal(faucet_address);
-    let challenge_url, challenge_code, challenge_nonce;
-    if (captcha_use == 'prussia_captcha') {
-      //pass these to nunjucks
-      let captcha_info = await captcha.get_captcha();
-      challenge_url = captcha_info[0];
-      challenge_code = captcha_info[1];
-      challenge_nonce = captcha_info[2];
-    }
-    return res.send(
-      nunjucks.render('nano.html', {
-        claim_time_str: claim_time_str,
-        faucet_name: faucet_name.replace("<coin>", "Nano"),
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        given: false,
-        faucet_address: faucet_address,
-        current_bal: current_bal,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        extra: extra,
-        is_default: config.nano.default
-      })
-    );
-  }
-  async function nano_post_handler(req, res) {
-    let errors = false;
-    let address = req.body.address;
-    if (!address) {
-      errors = "Invalid address";
-    } else {
-      //remove spaces
-      address = address.trim();
-    }
-    let amount = false;
-    let given = false;
-    let current_bal = await nano.check_bal(faucet_address);
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) {
-      errors = 'Too many claims from this IP address';
-    }
-    if (await nano.dry()) {
-      errors = 'Faucet dry';
-    }
-    if (!captcha.came_from_site(req)) {
-      errors = 'Post request did not come from site';
-    }
-    let success = await captcha.get_captcha_success(req.body);
-    if (!success) {
-      errors = 'Failed or expired captcha';
-      //return
-    }
-    let too_soon_db = await util.claim_too_soon_db(address, 'nano');
-    //check db
-    if (too_soon_db) {
-      errors = 'Last claim too soon';
-    }
-    //check cookies
-    let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, 'nano');
-    if (too_soon_cookies) {
-      errors = 'Last claim too soon';
-    }
-    //payouts
-    let config_payouts = config.nano.payouts;
-    let challenge_url, challenge_code, challenge_nonce;
-    let payout = util.calculate_payouts(config_payouts);
-    //reduce payouts for suspicious accounts
-    if (config.unopened_reduced_payouts && (await nano.is_unopened(address))) {
-      payout = config.nano.payouts.min_payout * 0.5;
-    }
-    if (!nano.is_valid(address)) {
-      errors = "Invalid Nano address";
-    }
-    if (!errors) {
-      let success = await nano.send(address, payout);
-      if (!success) {
-        errors = 'Send failed';
-      } else {
-        given = true;
-        amount = util.format_amount_decimals(payout);
-        if (ip_cache[ip]) {
-          ip_cache[ip] = ip_cache[ip] + 1;
-        } else {
-          ip_cache[ip] = 1;
-        }
-        await util.add_to_db(address, 'nano');
-        util.add_to_cookies(res, 'nano');
-      }
-    } else {
-      if (captcha_use == 'prussia_captcha') {
-        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
-      }
-    }
-    return res.send(
-      nunjucks.render('nano.html', {
-        claim_time_str: claim_time_str,
-        faucet_name: faucet_name.replace("<coin>", "Nano"),
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        given: given,
-        amount: amount,
-        faucet_address: faucet_address,
-        address: address,
-        current_bal: current_bal,
-        errors: errors,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        extra: extra,
-        is_default: config.nano.default
-      })
-    );
-  }
-  if (config.nano.default) {
-    default_found = true;
-    app.get('/', nano_get_handler);
-    app.post('/', nano_post_handler);
-  } else {
-    app.get('/nano', nano_get_handler);
-    app.post('/nano', nano_post_handler);
-  }
+  nano_controller = require('./controllers/nano.js');
+
+  app.get(use_default === 'nano' ? '/' : '/nano', nano_controller.get_nano);
+  app.post(use_default === 'nano' ? '/' : '/nano', nano_controller.post_nano);
 }
+
+// xDai
 if (config.enabled_coins.includes('xdai')) {
-  let ip_cache = {};
-  xdai = require('./cryptos/xdai.js');
-  let extra = {};
-  //turn this into claim time string
-  let claim_time_str = util.milliseconds_to_readable(config.xdai.claim_frequency);
-  let faucet_address = config.xdai.address;
-  async function xdai_get_handler(req, res) {
-    let challenge_url, challenge_code, challenge_nonce;
-    if (captcha_use == 'prussia_captcha') {
-      //pass these to nunjucks
-      let captcha_info = await captcha.get_captcha();
-      challenge_url = captcha_info[0];
-      challenge_code = captcha_info[1];
-      challenge_nonce = captcha_info[2];
-    }
-    return res.send(
-      nunjucks.render('xdai.html', {
-        //faucet_name, amount, faucet_address, errors,amount ,address, captcha
-        faucet_name: faucet_name.replace("<coin>", "xDai"),
-        faucet_address: faucet_address,
-        errors: false,
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        given: false,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        is_default: config.xdai.default
-      })
-    );
-  }
-  async function xdai_post_handler(req, res) {
-    let address = req.body.address;
-    let errors = false;
-    let amount = false;
-    let given = false;
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) {
-      errors = 'Too many claims from this IP address';
-    }
-    if (await xdai.dry()) {
-      errors = 'Faucet dry';
-    }
-    if (!captcha.came_from_site(req)) {
-      errors = 'Post request did not come from site';
-    }
-    let success = await captcha.get_captcha_success(req.body);
-    if (!success) {
-      errors = 'Failed or expired captcha';
-      //return
-    }
-    let too_soon_db = await util.claim_too_soon_db(address, 'xdai');
-    //check db
-    if (too_soon_db) {
-      errors = 'Last claim too soon';
-    }
-    //check cookies
-    let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, 'xdai');
-    if (too_soon_cookies) {
-      errors = 'Last claim too soon';
-    }
-    //payouts
-    let config_payouts = config.xdai.payouts;
-    let challenge_url, challenge_code, challenge_nonce;
-    let payout = util.calculate_payouts(config_payouts);
-    //reduce payouts for suspicious accounts
-    if (config.unopened_reduced_payouts && (await xdai.is_unopened(address))) {
-      payout = config.xdai.payouts.min_payout * 0.5;
-    }
-    if (!errors) {
-      let success = await xdai.send(address, payout);
-      if (!success) {
-        errors = 'Send failed';
-      } else {
-        given = true;
-        amount = util.format_amount_decimals(payout);
-        if (ip_cache[ip]) {
-          ip_cache[ip] = ip_cache[ip] + 1;
-        } else {
-          ip_cache[ip] = 1;
-        }
-        await util.add_to_db(address, 'xdai');
-        util.add_to_cookies(res, 'xdai');
-      }
-    } else {
-      if (captcha_use == 'prussia_captcha') {
-        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
-      }
-    }
-    return res.send(
-      nunjucks.render('xdai.html', {
-        faucet_name: faucet_name.replace("<coin>", "xDai"),
-        faucet_address: faucet_address,
-        address: address,
-        errors: errors,
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        given: given,
-        amount: amount,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        is_default: config.xdai.default
-      })
-    );
-  }
-  if (config.xdai.default) {
-    default_found = true;
-    app.get('/', xdai_get_handler);
-    app.post('/', xdai_post_handler);
-  } else {
-    app.get('/xdai', xdai_get_handler);
-    app.post('/xdai', xdai_post_handler);
-  }
+  xdai_controller = require('./controllers/xdai.js');
+
+  app.get(use_default === 'xdai' ? '/' : '/xdai', xdai_controller.get_xdai);
+  app.post(use_default === 'xdai' ? '/' : '/xdai', xdai_controller.post_xdai);
 }
+
+// Vite
 if (config.enabled_coins.includes('vite')) {
-  let ip_cache = {};
-  vite = require('./cryptos/vite.js');
-  vite.receive.start({
-    checkTime: 3000,
-    transctionNumber: 10,
-  });
-  let extra = {};
-  //turn this into claim time string
-  let claim_time_str = util.milliseconds_to_readable(config.vite.claim_frequency);
-  let faucet_address = config.vite.address;
-  //vite is special, in that we also want it to send tokens. should probably also do this for xdai eventually
-  async function vite_get_handler(req, res) {
-    let challenge_url, challenge_code, challenge_nonce;
-    if (captcha_use == 'prussia_captcha') {
-      //pass these to nunjucks
-      let captcha_info = await captcha.get_captcha();
-      challenge_url = captcha_info[0];
-      challenge_code = captcha_info[1];
-      challenge_nonce = captcha_info[2];
-    }
-    return res.send(
-      nunjucks.render('vite.html', {
-        errors: false,
-        given: false,
-        captcha: captcha_use,
-        sitekey: hcaptcha_sitekey,
-        challenge_url: challenge_url,
-        challenge_code: challenge_code,
-        challenge_nonce: challenge_nonce,
-        is_default: config.vite.default
-      })
-    );
-  }
-  async function vite_post_handler(req, res) {
-    let address = req.body.address;
-    let errors = false;
-    let amount = false;
-    let given = false;
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) {
-      errors = 'Too many claims from this IP address';
-    }
-    let send_token = true;
-    let send_vite = true;
-    let dry_info = await vite.dry();
-    //sending the token is optional
-    if ((dry_info.coin) || (config.vite.token && dry_info.token && !config.vite.optional)) {
-      errors = 'Faucet dry';
-    } else if (config.vite.token && dry_info.token && config.vite.optional) {
-      send_token = false;
-    }
-    if (!captcha.came_from_site(req)) {
-      errors = 'Post request did not come from site';
-    }
-    let success = await captcha.get_captcha_success(req.body);
-    if (!success) {
-      errors = 'Failed or expired captcha';
-    }
-    let too_soon_db = await util.claim_too_soon_db(address, 'vite');
-    //check db
-    if (too_soon_db) {
-      errors = 'Last claim too soon';
-    }
-    //check cookies
-    let too_soon_cookies = await util.claim_too_soon_cookies(req.cookies, 'vite');
-    if (too_soon_cookies) {
-      errors = 'Last claim too soon';
-    }
-    //payouts
-    let config_payouts = config.vite.payouts;
-    let challenge_url, challenge_code, challenge_nonce;
-    let payout = util.calculate_payouts(config_payouts);
-    if (payout === 0) {
-      send_vite = false;
-    }
-    //reduce payouts for suspicious accounts
-    if (config.unopened_reduced_payouts && (await vite.is_unopened(address))) {
-      payout = config.vite.payouts.min_payout * 0.5;
-    }
-    if (!errors) {
-      //with vite, we may want to send tokens also. Luckily, this is all handled in crypto/vite.js
-      let success = await vite.send(address, payout, send_vite, send_token);
-      if (!success) {
-        errors = 'Send failed';
-      } else {
-        given = true;
-        amount = util.format_amount_decimals(payout);
-        if (ip_cache[ip]) {
-          ip_cache[ip] = ip_cache[ip] + 1;
-        } else {
-          ip_cache[ip] = 1;
-        }
-        await util.add_to_db(address, 'vite');
-        util.add_to_cookies(res, 'vite');
-      }
-    } else {
-      if (captcha_use == 'prussia_captcha') {
-        [challenge_url, challenge_code, challenge_nonce] = await captcha.get_captcha();
-      }
-    }
-    if (!config.vite.token) {
-      return res.send(
-        nunjucks.render('vite.html', {
-          errors: errors,
-          given: given,
-          captcha: captcha_use,
-          sitekey: hcaptcha_sitekey,
-          challenge_url: challenge_url,
-          challenge_code: challenge_code,
-          challenge_nonce: challenge_nonce,
-          amount: amount,
-          address: address,
-          faucet_address: faucet_address,
-          token: false,
-          is_default: config.vite.default
-        })
-      );
-    } else {
-      return res.send(
-        nunjucks.render('vite.html', {
-          errors: errors,
-          given: given,
-          captcha: captcha_use,
-          sitekey: hcaptcha_sitekey,
-          challenge_url: challenge_url,
-          challenge_code: challenge_code,
-          challenge_nonce: challenge_nonce,
-          amount: amount,
-          address: address,
-          faucet_address: faucet_address,
-          token: config.vite.token.alias,
-          amount_token: config.vite.token.amount,
-          is_default: config.vite.default
-        })
-      );
-    }
-  }
-  if (config.vite.default) {
-    default_found = true;
-    app.get('/', vite_get_handler);
-    app.post('/', vite_post_handler);
-  } else {
-    app.get('/vite', vite_get_handler);
-    app.post('/vite', vite_post_handler);
-  }
+  vite_controller = require('./controllers/vite.js');
+
+  app.get(use_default === 'vite' ? '/' : '/vite', vite_controller.get_vite);
+  app.post(use_default === 'vite' ? '/' : '/vite', vite_controller.post_vite);
 }
 
-if (!default_found) {
+// If no default faucet was found in config, use a generic route
+if (use_default === null) {
   app.get('/', async function (req, res) {
-    return res.send(nunjucks.render('main.html', { faucet_name: faucet_name.replace("<coin>", ""), enabled_coins: config.enabled_coins }));
+    res.locals.faucet_name = config.name.replace('<coin>', '');
+    res.locals.enabled_coins = config.enabled_coins;
+    return res.render('index');
   });
 }
 
-app.listen(8080, async () => {
-  //recieve banano deposits (nano's POW is much more expensive, so public nodes don't like it when receive_deposits is called)
-  if (config.enabled_coins.includes('banano')) {
-    if (config.banano.auto_receive) {
-      await banano.receive_deposits();
+// Error handlers
+app.use([
+  (req, res, next) => {
+    res.locals.faucet_name = config.name.replace('<coin>', '');
+    res.locals.error = {
+      status: '404 Not Found',
+      message: 'The server cannot find the requested resource.',
+    };
+    res.status(404);
+    return res.render('error');
+  },
+  (error, req, res, next) => {
+    if (config.debug) console.log(error);
+    if (error.status === 405) {
+      res.status(405);
+      res.locals.error = {
+        status: '405 Method Not Allowed',
+        message: 'The method received in the request is not supported by the target resource.',
+      };
+    } else {
+      res.status(500);
+      res.locals.error = {
+        status: '500 Internal Server Error',
+        message: 'Something went wrong, please contact the developer if the problem persists.',
+      };
     }
-  }
-  console.log(`App on`);
+    res.locals.faucet_name = config.name.replace('<coin>', '');
+    return res.render('error');
+  },
+]);
+
+app.listen(config.port, async () => {
+  // Proof of work for Nano is expensive and it is a feature we recommend to have disabled
+  app.locals.received_nano = false;
+  app.locals.received_banano = false;
+  console.log(`App running on port ${config.port}`);
 });
