@@ -8,6 +8,8 @@ const Big = require('big.js');
  * https://docs.vite.org/vite-docs/api/rpc/ledger_v2.html#
  */
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Vite setup
 let rpc, provider;
 
@@ -116,6 +118,9 @@ async function send(private_key, sender_address, address, amount, options) {
   // Send token
   // Token can be undefined
   if (options.send_token) {
+    if (options.send_vite) {
+      await sleep(1200);
+    }
     let token_send = vite.accountBlock
       .createAccountBlock('send', {
         address: sender_address,
