@@ -25,6 +25,6 @@ Prussia Captcha is a text based captcha. Think of the captchas from the 2000s. A
 
 ## About the Prussia Captcha Splash Middleware
 
-The Prussia Captcha Splash Middleware is an Express middleware implementation of the Prussia Captcha made by [HalfBakedBread](https://www.github.com/HalfBakedBread).
+The Prussia Captcha Splash Middleware is an Express middleware implementation of the Prussia Captcha made by [HalfBakedBread](https://www.github.com/halfbakedbread).
 
  _To learn more about the Prussia Captcha Splash Middleware, see [readme.md](../utils/splash/README.md)_
