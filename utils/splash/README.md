@@ -1,6 +1,6 @@
 # Prussia Captcha Splash Middleware
 
-The Prussia Captcha Splash Middleware is a middleware implementation of the Prussia Captcha for Express.js made by [HalfBakedBread](https://www.github.com/HalfBakedBread).
+The Prussia Captcha Splash Middleware is a middleware implementation of the Prussia Captcha for Express.js made by [HalfBakedBread](https://www.github.com/halfbakedbread).
 
 ## About the middleware
 
@@ -10,7 +10,7 @@ One key feature of this middleware is that it does not require any dependencies 
 
 ## Usage
 
-The middleware is enabled by default as it is used as a security feature for the faucets. If you don't wan't to use it, only change the `use_splash` value inside the `captcha` property from `false` to `true` in the `config.json` file.
+The middleware is enabled by default as it is used as a security feature for the faucets. If you don't wan't to use it, only change the `use_splash` value inside the `captcha` property from `true` to `false` in the `config.json` file.
 
 ## Installation
 
@@ -36,7 +36,7 @@ app.use(splash(captcha_options));
 
 ### `options` object properties
 
-- `proted_paths`: Array of path strings the middleware will protect with a captcha. Required
+- `protected_paths`: Array of path strings the middleware will protect with a captcha. Required
 - `debug`: Set to `true` to log middleware errors to the console. Deafults to `false`
 - `captcha_title`: Name and title of your website. Deafults to `Catpcha`
 - `expiration_time`: Expiration time of the secure cookie in milliseconds. Deafults to one week

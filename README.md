@@ -194,7 +194,7 @@ Don't forget to give the project a star! Thanks again!
 - [Prussia/jetstream0](https://github.com/jetstream0) - Creator and mantainer
 - [Walton Jones/salty-walty](https://github.com/jetstream0) - Banano Front-end template
 - [KaffinPX](https://github.com/KaffinPX) - Overhaul of `cryptos/vite.js`
-- [Ash Bauer/HalfBakedBread](https://github.com/HalfBakedBread) - Refactor and update to v2.1.9. Prussia Captcha Splash Middleware. Documentation. New templates
+- [Ash Bauer/HalfBakedBread](https://github.com/halfbakedbread) - Refactor and update to v2.1.9. Prussia Captcha Splash Middleware. Documentation. New templates
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
