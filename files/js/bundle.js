@@ -305,6 +305,13 @@
     renderQr('qrCode', qrAddress);
   }
 
+  //add query string checks: if address param given, autofill it
+  let searchParams = new URLSearchParams(window.location.search);
+  let addrs = searchParams.get("addrs");
+  if (addrs) {
+    document.getElementById("address").value = addrs;
+  }
+
   /*
    * Events
    */
