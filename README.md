@@ -50,6 +50,7 @@
       <ul>
         <li><a href="#captcha-and-security">Captcha and security</a></li>
         <li><a href="#why-run-a-faucet">Why run a faucet</a></li>
+        <li><a href="#running-evm-faucets-polygon-arbitrum-etc">Running EVM faucets (Polygon, Arbitrum, etc)</a></li>
         <li><a href="#advanced">Advanced</a></li>
       </ul>
     </li>
@@ -149,6 +150,15 @@ Running a faucet is unlikely to be profitable, but it may help promote your proj
 
 Getting a sponsor may help offset the costs of running a faucet.
 
+### Running EVM faucets (Polygon, Arbitrum, etc)
+
+This faucet already supports xDai, so it is simple to change the xDai faucet into using any other EVM chain.
+
+- Change the `rpc` for xDai (in `config.js`) to the rpc for the EVM chain
+- Don't want the `/xdai` URL? Make the xDai faucet the default in `config.js`.
+- Finally, change instances of "xDai" into whatever EVM chain is being used in `/templates/xdai.html`, and change the logo.
+
+
 ### Advanced
 
 For more customized faucets, it is recommended that you know JavaScript, HTML, and CSS. Likely, your customization needs can be fulfilled by editing the relevant HTML files in `/templates`, and the CSS files and PNG images in `/files/css` and `/files/img` respectively.
@@ -166,8 +176,10 @@ For more customized faucets, it is recommended that you know JavaScript, HTML, a
 - [x] Add address checks for every coin
 - [x] Add invisible captcha
 - [x] Documentation
-- [ ] Add GoBanMe
+- [ ] Support token sends for xDai and Vite
 - [ ] Add Algorand faucet
+- [ ] Show block explorer tx links after claim
+- [ ] Add GoBanMe
 - [ ] Implement blacklist
 
 See the [open issues](https://github.com/jetstream0/faucet-v2/issues) for a full list of proposed features (and known issues).

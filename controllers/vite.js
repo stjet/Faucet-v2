@@ -61,7 +61,7 @@ async function post_vite(req, res, next) {
     let send_vite = config.vite?.token ?? true;
 
     // Check if faucet is dry
-    let dry_info = await vite.dry(faucet_address, send_vite, config.token?.amount, config.vite?.token?.amount ?? 0);
+    let dry_info = await vite.dry(faucet_address, send_vite, config.vite?.token?.id, config.vite?.token?.amount ?? 0);
 
     // Sending the token is optional
     if (dry_info.coin || (config.vite.token && dry_info.token && !config.vite.optional)) errors = 'Faucet dry.';

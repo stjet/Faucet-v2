@@ -59,7 +59,7 @@ async function dry(address, check_token = false, token_id = undefined, token_min
   let dry_info = { token: false, coin: false };
   let bal = await check_bal(address, check_token, token_id);
   if (bal[0] < 1) dry_info.coin = true;
-  if (bal[1] !== false && bal[1] < token_min_amount) dry_info.token = true;
+  if (bal[1] !== false && bal[1] <= token_min_amount) dry_info.token = true;
   return dry_info;
 }
 
