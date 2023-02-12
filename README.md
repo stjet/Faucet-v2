@@ -192,7 +192,7 @@ Don't forget to give the project a star! Thanks again!
 ### Contributors 
 
 - [Prussia/jetstream0](https://github.com/jetstream0) - Creator and mantainer
-- [Walton Jones/salty-walty](https://github.com/jetstream0) - Banano Front-end template
+- [Walton Jones/salty-walty](https://github.com/salty-walty) - Banano Front-end template
 - [KaffinPX](https://github.com/KaffinPX) - Overhaul of `cryptos/vite.js`
 - [Ash Bauer/HalfBakedBread](https://github.com/halfbakedbread) - Refactor and update to v2.1.9. Prussia Captcha Splash Middleware. Documentation. New templates
 
