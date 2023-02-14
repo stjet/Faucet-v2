@@ -159,6 +159,7 @@ This faucet already supports xDai, so it is simple to change the xDai faucet int
 - Finally, change instances of "xDai" into whatever EVM chain is being used in `/templates/xdai.html`, and change the logo.
 
 
+
 ### Advanced
 
 For more customized faucets, it is recommended that you know JavaScript, HTML, and CSS. Likely, your customization needs can be fulfilled by editing the relevant HTML files in `/templates`, and the CSS files and PNG images in `/files/css` and `/files/img` respectively.

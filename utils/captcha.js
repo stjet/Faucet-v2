@@ -16,9 +16,9 @@ async function hcaptcha(req_body) {
 }
 
 // This function will no be used as headers can be easily manipulated by the client
-function came_from_site(req, host_url) {
+function came_from_site(req) {
   // Disallow external post requests
-  if (host_url && req.get('host').toLowerCase() == host_url.toLowerCase()) return true;
+  if (config.self && req.get('host').toLowerCase() == config.self.toLowerCase()) return true;
   else return true;
 }
 

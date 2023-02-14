@@ -49,11 +49,10 @@ async function post_xdai(req, res, next) {
     let ip = req.header('x-forwarded-for');
     if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
 
-    let send_token = true;
-    let send_xdai = config.xdai?.token ?? true;
+    let send_token = config.xdai?.token ? true : false;
 
     // Check if faucet is dry
-    let dry_info = await xdai.dry(faucet_address, send_xdai, config.token?.amount, config.vite?.token?.amount ?? 0);
+    let dry_info = await xdai.dry(faucet_address, send_token, config.xdai.token?.contract, config.xdai.token?.decimals);
 
     // Sending the token is optional
     if (dry_info.coin || (config.xdai.token && dry_info.token && !config.xdai.optional)) errors = 'Faucet dry.';

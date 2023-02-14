@@ -8,7 +8,7 @@ Even though the `config.json` file can look intimidating, there are only a handf
 
 ### Global `config.json` properties
 
-- `self`: The url of your faucet, might cause problems if set incorrectly.d
+- `self`: The url of your faucet, might cause problems if set incorrectly.
 - `name`: The name of your faucet. Do not remove `<coin>` as it will be replaced with the name of the coins enabled.
 - `db`: Database. MongoDB is hardcoded, so this should not be changed.
 - `port`: The port of the faucet's server.

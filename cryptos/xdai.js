@@ -10,9 +10,9 @@ const erc20_abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{
 
 async function send(address, amount, options) {
   let txs = {};
-  if (options.xdai_send) {
+  if (options.send_xdai) {
     try {
-      let trans = wallet.sendTransaction({
+      let trans = await wallet.sendTransaction({
         to: address.toLowerCase(),
         value: ethers.utils.parseEther(String(amount)),
       });
@@ -21,16 +21,17 @@ async function send(address, amount, options) {
       return false;
     }
   }
-  if (options.token_send) {
+  if (options.send_token) {
     let token = new ethers.Contract(options.token_contract_address, erc20_abi, wallet);
 
     // Assumes 18 decimal places, the standard for tokens, unless token decimals are specified
-    options.token_amount = ethers.utils.parseUnits(options.token_amount, options.token_decimals ? options.token_decimals : 18);
+    options.token_amount = ethers.utils.parseUnits(String(options.token_amount), options.token_decimals ? options.token_decimals : 18);
     try {
       let trans = await token.transfer(address, options.token_amount);
-      txs["coin"] = trans.hash;
+      txs["token"] = trans.hash;
     } catch (error) {
-      //return false;
+      if (!options.xdai_send) return false;
+      //don't want to return fail if xdai send succeeded but token send didn't
     }
   }
   return txs;
@@ -49,11 +50,11 @@ async function check_bal(address, check_token = false, token_contract_address = 
   return re;
 }
 
-async function dry(address, check_token = false, contract_address = undefined, token_decimals = 18, token_min_amount = 0) {
+async function dry(address, check_token = false, contract_address = undefined, token_decimals = 18) {
   let dry_info = { token: false, coin: false };
   let bal = await check_bal(address, check_token, contract_address, token_decimals);
   if (bal[0] < 0.02) dry_info.coin = true;
-  if (bal[1] !== false && bal[1] <= token_min_amount) dry_info.token = true;
+  if (bal[1] !== false && bal[1] <= 0) dry_info.token = true;
   return dry_info;
 }
 
