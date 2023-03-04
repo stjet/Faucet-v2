@@ -137,7 +137,7 @@ async function post_vite(req, res, next) {
     res.locals.token = false;
     if (config.vite.token) {
       res.locals.token = config.vite.token.alias;
-      res.locals.amount_token = config.vite.token.amount;
+      res.locals.amount_token = format.format_amount_decimals(config.vite.token.amount);
     }
     res.locals.coin = 'vite';
     return res.render('vite');
