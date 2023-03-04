@@ -8,13 +8,13 @@ Even though the `config.json` file can look intimidating, there are only a handf
 
 ### Global `config.json` properties
 
-- `self`: The url of your faucet, might cause problems if set incorrectly
-- `name`: The name of your faucet. Do not remove `<coin>` as it will be replaced with the name of the coins enabled
-- `db`: Database. MongoDB is hardcoded, so this should not be changed
-- `port`: The port of the faucet's server
-- `owner`: The faucet owners name
-- `logo`: Your logo. To use a custom logo, set to `true` and place your own `logo.png` inside `files/img/`. If false or left undefined, it will display a generic logo
-- `unopened_reduced_payouts`: Set to `true` to reduce payouts to unopened accounts
+- `self`: The url of your faucet, might cause problems if set incorrectly.
+- `name`: The name of your faucet. Do not remove `<coin>` as it will be replaced with the name of the coins enabled.
+- `db`: Database. MongoDB is hardcoded, so this should not be changed.
+- `port`: The port of the faucet's server.
+- `owner`: The faucet owners name.
+- `logo`: Your logo. To use a custom logo, set to `true` and place your own `logo.png` inside `files/img/`. If false or left undefined, it will display a generic logo.
+- `unopened_reduced_payouts`: Set to `true` to reduce payouts to unopened accounts.
 
 ### `secrets` properties
 
@@ -24,8 +24,8 @@ Even though the `config.json` file can look intimidating, there are only a handf
 ### `notice` properties
 
 Set to `false` if you do not want to display any notice.
-- `title`: The title of the notice 
-- `content`: The content of the notice 
+- `title`: The title of the notice.
+- `content`: The content of the notice.
 - `link`: The link inside of the notice. Set to `false` if you do not want to display a link.
 
 ### `sponsor` properties
@@ -38,29 +38,40 @@ Set to `false` if you do not want to display any sponsor. *Only works for Banano
 ### `captcha` properties
 
 - `hcaptcha_sitekey`: Your public hCaptcha Site Key.
-- `use_splash`: Set to `false` to disable the Prussia Captcha Splash Middleware 
+- `use_splash`: Set to `false` to disable the Prussia Captcha Splash Middleware.
 - `prussia_captcha`: The main server url for Prussia Captcha; do not change unless you can run your own.
 
 ### `coin` properties
 
 - `claim_frequency`: Claim frequency time in milliseconds.
 - `enabled`: Set to `false` to disable the coin; you do not need to remove all of the coin properties to disable it.
-- `auto_receive`: Set to `false` to prevent the server from automatically receiving deposits to the faucet account. Not recommended to use with Nano as the proof of work is expensive. *Only works for Nano and Banano*
-- `address`: The address of the faucet. Make sure it's the same as the seed you declare in the secrets, and that is the first account of that seed
-- `rpc`: RPC url of the node that the faucet will use to communicate with the coin's network
+- `auto_receive`: Set to `false` to prevent the server from automatically receiving deposits to the faucet account. Not recommended to use with Nano as the proof of work is expensive. *Only works for Nano and Banano*.
+- `address`: The address of the faucet. Make sure it's the same as the seed you declare in the secrets, and that is the first account of that seed.
+- `rpc`: RPC url of the node that the faucet will use to communicate with the coin's network, you can leave empty and it will fallback to a default.
 
 ### `payout` properties of `coin` property
 
-- `min_payout`: Minimum amount to give in the coin's designation.
-- `max_payout`: Maximum amount to give in the coin's designation.
-- `percentage`: Set a percentage amount of the entire available balance to give.
+- `min_payout`: Minimum amount to give of the coin.
+- `max_payout`: Maximum amount to give of the coin.
+- `percentage`: Set a percentage amount of the entire available balance to give (decimal from 0 to 1). `min_payout` and `max_payout` values will still be obeyed.
+
+### `optional` properties of `coin` if key name is `vite` or `xdai`
+
+Set to `true` if sending the token is optional (If faucet is out of tokens, it will continue to send just the coin).
 
 ### `token` properties of `coin` if key name is `vite`
 
-Set to `false` if you do not want to use a Vite token
-- `id`: Id of the Vite token to use
-- `amount`: Maximum amount to give in the token's designation
-- `decimals`: Number of decimals in the token's desination
+Set to `false` if you do not want to send a Vite token.
+- `id`: Id of the Vite token to use.
+- `amount`: Maximum amount to give of the token.
+- `decimals`: Number of decimals of the token.
+
+### `token` properties of `coin` if key name is `xdai`
+
+Set to `false` if you do not want to send a xDai token.
+- `contract`: Contract Address of the token.
+- `amount`: Maximum amount to give of the token.
+- `decimals`: Number of decimals of the token. Defaults to `18`.
 
 ## Production ready `config.json` reference file
 

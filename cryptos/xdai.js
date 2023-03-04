@@ -6,25 +6,56 @@ let provider, wallet;
 const set_rpc = (url) => (provider = new ethers.providers.JsonRpcProvider(url));
 const connect = (private_key) => (wallet = new ethers.Wallet(private_key).connect(provider));
 
-async function send(address, amount) {
-  try {
-    wallet.sendTransaction({
-      to: address.toLowerCase(),
-      value: ethers.utils.parseEther(String(amount)),
-    });
-    return true;
-  } catch (error) {
-    return false;
+const erc20_abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
+
+async function send(address, amount, options) {
+  let txs = {};
+  if (options.send_xdai) {
+    try {
+      let trans = await wallet.sendTransaction({
+        to: address.toLowerCase(),
+        value: ethers.utils.parseEther(String(amount)),
+      });
+      txs["coin"] = trans.hash;
+    } catch (error) {
+      return false;
+    }
   }
+  if (options.send_token) {
+    let token = new ethers.Contract(options.token_contract_address, erc20_abi, wallet);
+
+    // Assumes 18 decimal places, the standard for tokens, unless token decimals are specified
+    options.token_amount = ethers.utils.parseUnits(String(options.token_amount), options.token_decimals ? options.token_decimals : 18);
+    try {
+      let trans = await token.transfer(address, options.token_amount);
+      txs["token"] = trans.hash;
+    } catch (error) {
+      if (!options.xdai_send) return false;
+      //don't want to return fail if xdai send succeeded but token send didn't
+    }
+  }
+  return txs;
 }
 
-async function check_bal(address) {
-  return ethers.utils.formatEther(await provider.getBalance(address));
+async function check_bal(address, check_token = false, token_contract_address = undefined, token_decimals = 18) {
+  let re = [];
+  re.push(ethers.utils.formatEther(await provider.getBalance(address)));
+  if (check_token) {
+    let re = [];
+    let token = new ethers.Contract(token_contract_address, erc20_abi, wallet);
+    re.push(Math.floor(ethers.utils.formatUnits(await token.balanceOf(address), token_decimals)));
+  } else {
+    re.push(0);
+  }
+  return re;
 }
 
-async function dry(address) {
-  if (Number(await check_bal(address, provider)) < 0.02) return true;
-  else return false;
+async function dry(address, check_token = false, contract_address = undefined, token_decimals = 18) {
+  let dry_info = { token: false, coin: false };
+  let bal = await check_bal(address, check_token, contract_address, token_decimals);
+  if (bal[0] < 0.02) dry_info.coin = true;
+  if (bal[1] !== false && bal[1] <= 0) dry_info.token = true;
+  return dry_info;
 }
 
 async function get_account_history(address) {
@@ -51,14 +82,6 @@ function address_related_to_blacklist(account_history, blacklisted_addresses) {
 async function is_valid(address) {
   if (ethers.utils.isAddress(address)) return true;
   else return false;
-}
-
-async function send_token(address, amount, token_contract_address, token_abi = []) {
-  let token = new ethers.Contract(token_contract_address, token_abi, wallet);
-
-  // Assumes 18 decimal places, the standard for tokens. Change it if the amount of places is different
-  amount = ethers.utils.parseUnits(amount, 18);
-  return await token.transfer(address, amount);
 }
 
 module.exports = {

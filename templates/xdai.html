@@ -6,8 +6,8 @@
     <meta name="description" content="Earn Free xDai!" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="{{ faucet_name }}" />
-    <meta property="og:description" content="Earn Free Nano!" />
-    <meta property="og:image" content="img/nano-logo.png" />
+    <meta property="og:description" content="Earn Free xDai!" />
+    <meta property="og:image" content="img/xdai-icon.png" />
     <title>{{ faucet_name }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,7 +32,7 @@
               <div class="col-12">
                 <div class="alert alert-success display" role="alert">
                   <h5 class="lead">Success!</h5>
-                  <p class="mb-0">You have been sent <b>{{ amount }} xDai</b> to <b><span class="text-wrap text-address">{{ given_to }}</span></b>.</p>
+                  <p class="mb-0">You have been sent <b>{{ amount }} xDai {% if token %}and {{ amount_token }} {{ token }}{% endif %}</b> to <b><span class="text-wrap text-address">{{ given_to }}</span></b>.</p>
                 </div>
               </div>
               {% else %}

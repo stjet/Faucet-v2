@@ -49,8 +49,14 @@ async function post_xdai(req, res, next) {
     let ip = req.header('x-forwarded-for');
     if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
 
+    let send_token = config.xdai?.token ? true : false;
+
     // Check if faucet is dry
-    if (await xdai.dry(config.xdai.address)) errors = 'Faucet dry.';
+    let dry_info = await xdai.dry(faucet_address, send_token, config.xdai.token?.contract, config.xdai.token?.decimals);
+
+    // Sending the token is optional
+    if (dry_info.coin || (config.xdai.token && dry_info.token && !config.xdai.optional)) errors = 'Faucet dry.';
+    else if (config.xdai.token && dry_info.token && config.xdai.optional) send_token = false;
 
     // Check request procedence
     if (!captcha.came_from_site(req)) errors = 'Post request did not come from site';
@@ -78,7 +84,15 @@ async function post_xdai(req, res, next) {
 
     // Send xDai
     if (!errors) {
-      let success = await xdai.send(address, payout);
+      let options = {
+        send_xdai: true,
+        send_token: send_token,
+        token_contract_address: config.xdai?.token?.contract,
+        token_amount: config.xdai?.token?.amount,
+        token_decimals: config.xdai?.token?.decimals,
+      };
+
+      let success = await xdai.send(address, payout, options);
 
       if (success) {
         given = true;
@@ -111,6 +125,11 @@ async function post_xdai(req, res, next) {
     res.locals.given = given;
     res.locals.given_to = address;
     res.locals.errors = errors;
+    res.locals.token = false;
+    if (config.xdai.token) {
+      res.locals.token = config.xdai.token.alias;
+      res.locals.amount_token = format.format_amount_decimals(config.xdai.token.amount);
+    }
     res.locals.coin = 'xdai';
     return res.render('xdai');
   } catch (error) {

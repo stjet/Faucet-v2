@@ -10,7 +10,7 @@ One key feature of this middleware is that it does not require any dependencies 
 
 ## Usage
 
-The middleware is enabled by default as it is used as a security feature for the faucets. If you don't wan't to use it, only change the `use_splash` value inside the `captcha` property from `true` to `false` in the `config.json` file.
+The middleware is enabled by default as it is used as a security feature for the faucets. If you don't want to use it, only change the `use_splash` value inside the `captcha` property from `true` to `false` in the `config.json` file.
 
 ## Installation
 
