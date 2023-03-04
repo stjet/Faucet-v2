@@ -158,6 +158,8 @@ This faucet already supports xDai, so it is simple to change the xDai faucet int
 - Don't want the `/xdai` URL? Make the xDai faucet the default in `config.js`.
 - Finally, change instances of "xDai" into whatever EVM chain is being used in `/templates/xdai.html`, and change the logo.
 
+The xDai faucet also supports sending tokens, check the documentation for more information on that.
+
 
 
 ### Advanced
@@ -177,7 +179,7 @@ For more customized faucets, it is recommended that you know JavaScript, HTML, a
 - [x] Add address checks for every coin
 - [x] Add invisible captcha
 - [x] Documentation
-- [ ] Support token sends for xDai and Vite
+- [x] Support token sends for xDai/EVM and Vite
 - [ ] Add Algorand faucet
 - [ ] Show block explorer tx links after claim
 - [ ] Add GoBanMe

@@ -125,6 +125,11 @@ async function post_xdai(req, res, next) {
     res.locals.given = given;
     res.locals.given_to = address;
     res.locals.errors = errors;
+    res.locals.token = false;
+    if (config.xdai.token) {
+      res.locals.token = config.xdai.token.alias;
+      res.locals.amount_token = config.xdai.token.amount;
+    }
     res.locals.coin = 'xdai';
     return res.render('xdai');
   } catch (error) {
