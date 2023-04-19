@@ -14,6 +14,11 @@ const token_only = config.vite.optional;
 let ip_cache = {};
 let private_key;
 
+// Reset IP cache every 24 hours
+setInterval(() => {
+  ip_cache = {};
+}, 24*60*60*1000);
+
 config.secrets.use_env ? (private_key = process.env.vite_privkey) : (private_key = config.secrets.vite_privkey);
 
 vite.set_rpc(config.vite.rpc);

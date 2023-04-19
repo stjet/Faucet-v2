@@ -13,6 +13,11 @@ let blacklisted_addresses = config.blacklist.nano;
 let ip_cache = {};
 let seed;
 
+// Reset IP cache every 24 hours
+setInterval(() => {
+  ip_cache = {};
+}, 24*60*60*1000);
+
 config.secrets.use_env ? (seed = process.env.bn_seed) : (seed = config.secrets.bn_seed);
 
 nano.set_rpc(config.nano.rpc);
@@ -85,22 +90,24 @@ async function post_nano(req, res, next) {
     let config_payouts = config.nano.payouts;
     let payout = faucet.calculate_payouts(config_payouts);
 
-    let recipient_balance = await nano.check_bal(address);
-    let recipient_account_history = await nano.get_account_history(address);
-
-    let user_score = await score.get_score({
-      account_balance: recipient_balance,
-      account_history: recipient_account_history,
-      blacklisted_addresses: blacklisted_addresses,
-    });
-
-    // Reduce payouts for suspicious accounts
-    if ((config.unopened_reduced_payouts && !recipient_account_history) || user_score > 5) {
-      payout = config.nano.payouts.min_payout * 0.5;
-    }
-
     // Send Nano
     if (!errors) {
+      //Check score
+      let recipient_balance = await nano.check_bal(address);
+      let recipient_account_history = await nano.get_account_history(address);
+
+      let user_score = await score.get_score({
+        account_balance: recipient_balance,
+        account_history: recipient_account_history,
+        blacklisted_addresses: blacklisted_addresses,
+      });
+
+      // Reduce payouts for suspicious accounts
+      if ((config.unopened_reduced_payouts && !recipient_account_history) || user_score > 5) {
+        payout = config.nano.payouts.min_payout * 0.5;
+      }
+
+      // Actually send Nano
       const success = await nano.send(seed, address, payout);
       tx = success;
 
