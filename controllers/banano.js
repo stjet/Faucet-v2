@@ -13,6 +13,11 @@ let blacklisted_addresses = config.blacklist.banano;
 let ip_cache = {};
 let seed;
 
+// Reset IP cache every 24 hours
+setInterval(() => {
+  ip_cache = {};
+}, 24*60*60*1000);
+
 config.secrets.use_env ? (seed = process.env.bn_seed) : (seed = config.secrets.bn_seed);
 
 banano.set_rpc(config.banano.rpc);
@@ -82,22 +87,24 @@ async function post_banano(req, res, next) {
     let config_payouts = config.banano.payouts;
     let payout = faucet.calculate_payouts(config_payouts);
 
-    let recipient_balance = await banano.check_bal(address);
-    let recipient_account_history = await banano.get_account_history(address);
-
-    let user_score = await score.get_score({
-      account_balance: recipient_balance,
-      account_history: recipient_account_history,
-      blacklisted_addresses: blacklisted_addresses,
-    });
-
-    // Reduce payouts for suspicious accounts
-    if ((config.unopened_reduced_payouts && !recipient_account_history) || user_score > 5) {
-      payout = config.banano.payouts.min_payout * 0.5;
-    }
-
     // Send Banano
     if (!errors) {
+      //Check score
+      let recipient_balance = await banano.check_bal(address);
+      let recipient_account_history = await banano.get_account_history(address);
+
+      let user_score = await score.get_score({
+        account_balance: recipient_balance,
+        account_history: recipient_account_history,
+        blacklisted_addresses: blacklisted_addresses,
+      });
+
+      // Reduce payouts for suspicious accounts
+      if ((config.unopened_reduced_payouts && !recipient_account_history) || user_score > 5) {
+        payout = config.banano.payouts.min_payout * 0.5;
+      }
+
+      // Actually send Banano
       const success = await banano.send(seed, address, payout);
       tx = success;
 
