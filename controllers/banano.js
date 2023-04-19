@@ -13,6 +13,10 @@ let blacklisted_addresses = config.blacklist.banano;
 let ip_cache = {};
 let seed;
 
+setInterval(() =>  {
+  ip_cache = {};
+}, 24*60*60*1000);
+
 config.secrets.use_env ? (seed = process.env.bn_seed) : (seed = config.secrets.bn_seed);
 
 banano.set_rpc(config.banano.rpc);

@@ -11,6 +11,10 @@ const faucet_address = config.xdai.address;
 let ip_cache = {};
 let private_key;
 
+setInterval(() =>  {
+  ip_cache = {};
+}, 24*60*60*1000);
+
 config.secrets.use_env ? (private_key = process.env.eth_privkey) : (private_key = config.secrets.eth_privkey);
 
 xdai.set_rpc(config.xdai.rpc);
