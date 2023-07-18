@@ -57,7 +57,7 @@ async function post_banano(req, res, next) {
     let tx;
 
     // Validate and sanitize address input
-    if (!address) errors = 'Empty address field.';
+    if (!address || typeof address !== "string") errors = 'Empty address field.';
     else address = address.trim();
     if (!banano.is_valid(address)) errors = 'Invalid Banano address.';
 

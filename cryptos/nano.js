@@ -14,6 +14,9 @@ async function send(seed, address, amount) {
     const tx = await nanojs.sendNanoWithdrawalFromSeed(seed, 0, address, amount);
     return tx;
   } catch (error) {
+    if (process.env.debug) {
+      console.log(error);
+    }
     return false;
   }
 }

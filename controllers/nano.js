@@ -60,7 +60,7 @@ async function post_nano(req, res, next) {
     let tx;
 
     // Validate and sanitize address input
-    if (!address) errors = 'Empty address field.';
+    if (!address || typeof address !== "string") errors = 'Empty address field.';
     else address = address.trim();
     if (!nano.is_valid(address)) errors = 'Invalid Nano address.';
 
@@ -92,6 +92,9 @@ async function post_nano(req, res, next) {
 
     // Send Nano
     if (!errors) {
+      if (process.env.debug) {
+        console.log(errors, address, faucet_address);
+      }
       //Check score
       let recipient_balance = await nano.check_bal(address);
       let recipient_account_history = await nano.get_account_history(address);
