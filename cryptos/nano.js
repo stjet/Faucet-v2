@@ -9,12 +9,12 @@ async function set_auth(key) {
 }
 
 // Amount is in whole nano, not raw. I.e. 'amount = 4.2' sends 4.2 XNO
-async function send(seed, address, amount) {
+async function send(seed, address, amount, debug=false) {
   try {
     const tx = await nanojs.sendNanoWithdrawalFromSeed(seed, 0, address, amount);
     return tx;
   } catch (error) {
-    if (process.env.debug) {
+    if (debug) {
       console.log(error);
     }
     return false;
@@ -53,8 +53,8 @@ async function is_unopened(address, amount = -1) {
 async function receive_deposits(seed) {
   let rep = await nanojs.getAccountInfo(await nanojs.getNanoAccountFromSeed(seed, 0), true);
   // Set self as rep if no other set rep
-  if (!rep?.representative) await nanojs.receiveNanoDepositsForSeed(process.env.seed, 0, await nanojs.getNanoAccountFromSeed(process.env.seed, 0));
-  await nanojs.receiveNanoDepositsForSeed(process.env.seed, 0, rep);
+  if (!rep?.representative) await nanojs.receiveNanoDepositsForSeed(seed, 0, await nanojs.getNanoAccountFromSeed(process.env.seed, 0));
+  await nanojs.receiveNanoDepositsForSeed(seed, 0, rep);
 }
 
 function is_valid(address) {

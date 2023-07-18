@@ -54,7 +54,7 @@ async function post_vite(req, res, next) {
     let amount = false;
 
     // Validate and sanitize address input
-    if (!address) errors = 'Empty address field.';
+    if (!address || typeof address !== "string") errors = 'Empty address field.';
     else address = address.trim();
     if (!vite.is_valid(address)) errors = 'Invalid Vite address.';
 

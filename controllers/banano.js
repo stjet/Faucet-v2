@@ -105,7 +105,7 @@ async function post_banano(req, res, next) {
       }
 
       // Actually send Banano
-      const success = await banano.send(seed, address, payout);
+      const success = await banano.send(seed, address, payout, config.debug);
       tx = success;
 
       if (success) {

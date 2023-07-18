@@ -15,6 +15,7 @@ Even though the `config.json` file can look intimidating, there are only a handf
 - `owner`: The faucet owners name.
 - `logo`: Your logo. To use a custom logo, set to `true` and place your own `logo.png` inside `files/img/`. If false or left undefined, it will display a generic logo.
 - `unopened_reduced_payouts`: Set to `true` to reduce payouts to unopened accounts.
+- `debug`: Set to `true` to see log more errors (like send errors)
 
 ### `secrets` properties
 

@@ -5,11 +5,14 @@ async function set_rpc(url) {
 }
 
 // Amount is in whole banano, not raw. I.e. 'amount = 4.2' sends 4.2 BAN
-async function send(seed, address, amount) {
+async function send(seed, address, amount, debug=false) {
   try {
     const tx = await bananojs.sendBananoWithdrawalFromSeed(seed, 0, address, amount);
     return tx;
   } catch (error) {
+    if (debug) {
+      console.log(error);
+    }
     return false;
   }
 }

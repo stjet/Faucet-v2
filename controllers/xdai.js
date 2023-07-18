@@ -50,6 +50,8 @@ async function post_xdai(req, res, next) {
     let balance = false;
     let amount = false;
 
+    if (!address || typeof address !== "string") errors = 'Empty address field.';
+
     // Check client IP address
     let ip = req.header('x-forwarded-for');
     if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
@@ -97,7 +99,7 @@ async function post_xdai(req, res, next) {
         token_decimals: config.xdai?.token?.decimals,
       };
 
-      let success = await xdai.send(address, payout, options);
+      let success = await xdai.send(address, payout, options, config.debug);
 
       if (success) {
         given = true;

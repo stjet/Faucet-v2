@@ -92,9 +92,6 @@ async function post_nano(req, res, next) {
 
     // Send Nano
     if (!errors) {
-      if (process.env.debug) {
-        console.log(errors, address, faucet_address);
-      }
       //Check score
       let recipient_balance = await nano.check_bal(address);
       let recipient_account_history = await nano.get_account_history(address);
@@ -111,7 +108,7 @@ async function post_nano(req, res, next) {
       }
 
       // Actually send Nano
-      const success = await nano.send(seed, address, payout);
+      const success = await nano.send(seed, address, payout, config.debug);
       tx = success;
 
       if (success) {

@@ -8,7 +8,7 @@ const connect = (private_key) => (wallet = new ethers.Wallet(private_key).connec
 
 const erc20_abi = [{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
 
-async function send(address, amount, options) {
+async function send(address, amount, options, debug=false) {
   let txs = {};
   if (options.send_xdai) {
     try {
@@ -18,6 +18,9 @@ async function send(address, amount, options) {
       });
       txs["coin"] = trans.hash;
     } catch (error) {
+      if (debug) {
+        console.log(error);
+      }
       return false;
     }
   }
@@ -30,6 +33,9 @@ async function send(address, amount, options) {
       let trans = await token.transfer(address, options.token_amount);
       txs["token"] = trans.hash;
     } catch (error) {
+      if (debug) {
+        console.log(error);
+      }
       if (!options.xdai_send) return false;
       //don't want to return fail if xdai send succeeded but token send didn't
     }
