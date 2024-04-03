@@ -61,6 +61,6 @@ async function get_score(data) {
 }
 
 module.exports = {
-  address_related_to_blacklist: address_related_to_blacklist,
-  get_score: get_score,
+  address_related_to_blacklist,
+  get_score,
 };

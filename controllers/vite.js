@@ -4,6 +4,7 @@ const vite = require('../cryptos/vite');
 const faucet = require('../utils/faucet');
 const format = require('../utils/format');
 const captcha = require('../utils/captcha');
+const ip = require('../utils/ip');
 
 const faucet_name = config.name;
 const faucet_address = config.vite.address;
@@ -59,8 +60,8 @@ async function post_vite(req, res, next) {
     if (!vite.is_valid(address)) errors = 'Invalid Vite address.';
 
     // Check client IP address
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
+    let claimer_ip = ip.get_ip(req.connection.remoteAddress, req.header('x-forwarded-for'), config.trusted_proxy_count);
+    if (ip_cache[claimer_ip] > 4) errors = 'Too many claims from this IP address.';
 
     let send_token = true;
     let send_vite = config.vite?.token ?? true;

@@ -88,14 +88,14 @@ function calculate_payouts(config_payouts) {
 }
 
 module.exports = {
-  insert: insert,
-  replace: replace,
-  find: find,
-  count: count,
-  claim_too_soon_db: claim_too_soon_db,
-  claim_too_soon_cookies: claim_too_soon_cookies,
-  count_decimals: count_decimals,
-  calculate_payouts: calculate_payouts,
-  add_to_db: add_to_db,
-  add_to_cookies: add_to_cookies,
+  insert,
+  replace,
+  find,
+  count,
+  claim_too_soon_db,
+  claim_too_soon_cookies,
+  count_decimals,
+  calculate_payouts,
+  add_to_db,
+  add_to_cookies,
 };

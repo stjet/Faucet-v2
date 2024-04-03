@@ -24,5 +24,5 @@ function came_from_site(req) {
 
 module.exports = {
   get_captcha_success: hcaptcha,
-  came_from_site: came_from_site,
+  came_from_site,
 };

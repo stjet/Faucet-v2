@@ -4,6 +4,7 @@ const xdai = require('../cryptos/xdai');
 const faucet = require('../utils/faucet');
 const format = require('../utils/format');
 const captcha = require('../utils/captcha');
+const ip = require('../utils/ip');
 
 const faucet_name = config.name;
 const faucet_address = config.xdai.address;
@@ -53,8 +54,8 @@ async function post_xdai(req, res, next) {
     if (!address || typeof address !== "string") errors = 'Empty address field.';
 
     // Check client IP address
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
+    let claimer_ip = ip.get_ip(req.connection.remoteAddress, req.header('x-forwarded-for'), config.trusted_proxy_count);
+    if (ip_cache[claimer_ip] > 4) errors = 'Too many claims from this IP address.';
 
     let send_token = config.xdai?.token ? true : false;
 

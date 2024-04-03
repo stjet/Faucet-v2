@@ -5,6 +5,7 @@ const faucet = require('../utils/faucet');
 const format = require('../utils/format');
 const captcha = require('../utils/captcha');
 const score = require('../utils/score');
+const ip = require('../utils/ip');
 
 const faucet_name = config.name;
 const faucet_address = config.nano.address;
@@ -65,8 +66,8 @@ async function post_nano(req, res, next) {
     if (!nano.is_valid(address)) errors = 'Invalid Nano address.';
 
     // Check client IP address
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
+    let claimer_ip = ip.get_ip(req.connection.remoteAddress, req.header('x-forwarded-for'), config.trusted_proxy_count);
+    if (ip_cache[claimer_ip] > 4) errors = 'Too many claims from this IP address.';
 
     // Check if faucet is dry
     if (await nano.dry(faucet_address)) errors = 'Faucet dry.';

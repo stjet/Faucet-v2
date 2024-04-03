@@ -54,6 +54,7 @@ if (config.sponsor === undefined) config.sponsor = false;
 if (config.captcha.use_splash === undefined) config.captcha.use_splash = false;
 if (config.faucet_name === undefined) config.faucet_name = config.owner + ' Faucet';
 if (config.unopened_reduced_payouts === undefined) config.unopened_reduced_payouts = false;
+if (config.trusted_proxy_count === undefined) config.trusted_proxy_count = false;
 
 let enabled_coins = [];
 

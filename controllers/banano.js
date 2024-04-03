@@ -5,6 +5,7 @@ const faucet = require('../utils/faucet');
 const format = require('../utils/format');
 const captcha = require('../utils/captcha');
 const score = require('../utils/score');
+const ip = require('../utils/ip');
 
 const faucet_name = config.name;
 const faucet_address = config.banano.address;
@@ -62,8 +63,8 @@ async function post_banano(req, res, next) {
     if (!banano.is_valid(address)) errors = 'Invalid Banano address.';
 
     // Check client IP address
-    let ip = req.header('x-forwarded-for');
-    if (ip_cache[ip] > 4) errors = 'Too many claims from this IP address.';
+    let claimer_ip = ip.get_ip(req.connection.remoteAddress, req.header('x-forwarded-for'), config.trusted_proxy_count);
+    if (ip_cache[claimer_ip] > 4) errors = 'Too many claims from this IP address.';
 
     // Check if faucet is dry
     if (await banano.dry(faucet_address)) errors = 'Faucet dry.';
@@ -89,7 +90,7 @@ async function post_banano(req, res, next) {
 
     // Send Banano
     if (!errors) {
-      //Check score
+      // Check score
       let recipient_balance = await banano.check_bal(address);
       let recipient_account_history = await banano.get_account_history(address);
 
@@ -99,7 +100,7 @@ async function post_banano(req, res, next) {
         blacklisted_addresses: blacklisted_addresses,
       });
 
-      // Reduce payouts for suspicious accounts
+      // Reduce payouts for suspicious accounts, higher score = more suspicious
       if ((config.unopened_reduced_payouts && !recipient_account_history) || user_score > 5) {
         payout = config.banano.payouts.min_payout * 0.5;
       }

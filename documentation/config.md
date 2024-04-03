@@ -16,6 +16,7 @@ Even though the `config.json` file can look intimidating, there are only a handf
 - `logo`: Your logo. To use a custom logo, set to `true` and place your own `logo.png` inside `files/img/`. If false or left undefined, it will display a generic logo.
 - `unopened_reduced_payouts`: Set to `true` to reduce payouts to unopened accounts.
 - `debug`: Set to `true` to see log more errors (like send errors)
+- `trusted_proxy_count`: # of trusted proxies in between client and server. If omitted, or configured higher than it actually is, `X-Forwarded-For` will be used for IP rate limiting. This is better than nothing, but can be spoofed. If 0, will use the IP that sent the request. If unsure what any of this means, just omit it, do not set it to 0!
 
 ### `secrets` properties
 

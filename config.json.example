@@ -6,6 +6,7 @@
   "owner": "YOUR NAME",
   "logo": false,
   "unopened_reduced_payouts": false,
+  "trusted_proxy_count": 2,
   "notice": {
     "title": "More front-end potassium",
     "content": "All the faucets have a new look, go check them out!",

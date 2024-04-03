@@ -75,8 +75,8 @@ function milliseconds_to_readable(milliseconds) {
 }
 
 module.exports = {
-  get_number_decimal_zeros: get_number_decimal_zeros,
-  truncate_to_decimals: truncate_to_decimals,
-  format_amount_decimals: format_amount_decimals,
-  milliseconds_to_readable: milliseconds_to_readable,
+  get_number_decimal_zeros,
+  truncate_to_decimals,
+  format_amount_decimals,
+  milliseconds_to_readable,
 };
