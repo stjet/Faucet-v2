@@ -88,7 +88,7 @@
                 <form method="POST" action="{% if default_faucet === 'banano' %}/{% else %}/banano{% endif %}" id="form">
                   <div class="form-group">
                     <label for="address" class="form-label lead">Banano Address:</label>
-                    <input type="text" class="form-control border-light mb-2" onchange="checK_bns()" id="address" name="address" placeholder="ban_... or BNS domain" required />
+                    <input type="text" class="form-control border-light mb-2" onchange="check_bns()" id="address" name="address" placeholder="ban_... or BNS domain" required />
                   </div>
                   <div id="clientErrors"></div>
                   <div id="hcaptcha" class="h-captcha" data-sitekey="{{ sitekey }}" data-theme="dark" data-size="invisible" data-callback="captchaSubmit" data-chalexpired-callback="captchaExpired" data-open-callback="captchaOpen" data-close-callback="captchaClose" data-error-callback="captchaError">
